@@ -11,7 +11,7 @@ composer require neunerlei/arrays
 ```
 
 ## Source Code
-The source code can be found on github.
+The source code can be found on [github](https://github.com/Neunerlei/arrays).
 
 ## Special Thanks
 Special thanks goes to the folks at [LABOR.digital](https://labor.digital/) (which is the word german for laboratory and not the english "work" :D) for making it possible to publish my code online.
