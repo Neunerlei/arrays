@@ -1869,5 +1869,6 @@
         "ext-simplexml": "*",
         "ext-json": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "version": "1.1.0"
 }
