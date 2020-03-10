@@ -1,0 +1,50 @@
+name: Create new Release
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'composer.json'
+      - 'package.json'
+      - 'CHANGELOG.md'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        uses: actions/checkout@v1
+      -
+        uses: pxgamer/composer-action@master
+        with:
+          command: install
+      -
+        uses: pxgamer/composer-action@master
+        with:
+          command: test
+  
+  documentation:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      -
+        uses: actions/checkout@v1
+      -
+        name: vuepress-deploy
+        uses: jenkey2011/vuepress-deploy@master
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BUILD_SCRIPT: cd docs && npm i && npm run build
+          BUILD_DIR: docs/.vuepress/dist/
+  
+  release:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      -
+        uses: actions/checkout@v1
+      -
+        name: Create Changelog and bump release version
+        uses: labor-digital/conventional-release-action@master
+        with:
+          github-token: ${{ secrets.github_token }}

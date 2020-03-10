@@ -1,0 +1,14 @@
+{
+	"name": "@neunerlei/arrays-docs",
+	"version": "1.0.0",
+	"description": "Documentation",
+	"scripts": {
+		"dev": "vuepress dev .",
+		"build": "vuepress build ."
+	},
+	"author": "",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"vuepress": "^1.3.1"
+	}
+}
