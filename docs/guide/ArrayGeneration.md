@@ -1,5 +1,5 @@
 # Array Generation
-used formatsArrays can be serialized and unserialized into and from a variety of different formats. The array generation part of the library gives you some tools for the most commonly used formats.
+Arrays can be serialized and unserialized into and from a variety of different formats. The array generation part of the library gives you some tools for the most commonly used formats.
 
 ## makeFromXml()
 Receives a xml-input and converts it into a multidimensional array.
