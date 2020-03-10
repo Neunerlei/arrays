@@ -395,8 +395,10 @@ class ArrayPathsTest extends TestCase {
 			$this->fail("An empty array should never call the filter callback");
 		});
 		
-		$r = Arrays::filterPath($this->getTree(), "wild.*", function ($v, $path) {
+		$list = $this->getTree();
+		$r = Arrays::filterPath($this->getTree(), "wild.*", function ($v, $key, $path, $initialList) use ($list) {
 			if ($path !== ["wild", 0] && $path !== ["wild", 1]) $this->fail("Filter path was not as expected!");
+			$this->assertEquals($list, $initialList);
 			$this->assertIsArray($v);
 			$this->assertArrayHasKey("foo", $v);
 			return "asdf";
