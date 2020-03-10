@@ -11,7 +11,7 @@ composer require neunerlei/arrays
 ```
 
 ## Documentation
-The documentation can be found here.
+The documentation can be found [here](https://arrays.neunerlei.eu/).
 
 ## Running tests
 
