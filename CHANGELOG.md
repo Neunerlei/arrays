@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/Neunerlei/arrays/compare/v1.1.8...v1.2.0) (2020-07-01)
+
+
+### Features
+
+* update code to be PSR-2 compliant ([2701040](https://github.com/Neunerlei/arrays/commit/2701040a7df6aab739ef0597b3522bcc1a6f3d54))
+
+
+### Bug Fixes
+
+* **doc:** update dependencies for security reasons ([207a88c](https://github.com/Neunerlei/arrays/commit/207a88c287d044163150a950950372fa9e3ee580))
+
 ### [1.1.8](https://github.com/Neunerlei/arrays/compare/v1.1.7...v1.1.8) (2020-03-11)
 
 ### [1.1.7](https://github.com/Neunerlei/arrays/compare/v1.1.6...v1.1.7) (2020-03-10)
