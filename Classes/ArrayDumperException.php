@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Copyright 2020 Martin Neundorfer (Neunerlei)
  *
@@ -19,6 +20,7 @@
 
 namespace Neunerlei\Arrays;
 
-class ArrayDumperException extends ArrayException {
-	
+class ArrayDumperException extends ArrayException
+{
+
 }

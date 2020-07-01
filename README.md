@@ -28,7 +28,7 @@ The documentation is powered by [vuepress](https://vuepress.vuejs.org/), you can
 - Run the dev server with ```npm run dev```
 
 ## Special Thanks
-Special thanks goes to the folks at [LABOR.digital](https://labor.digital/) (which is the word german for laboratory and not the english "work" :D) for making it possible to publish my code online.
+Special thanks goes to the folks at [LABOR.digital](https://labor.digital/) (which is the german word for laboratory and not the english "work" :D) for making it possible to publish my code online.
 
 ## Postcardware
 You're free to use this package, but if it makes it to your production environment I highly appreciate you sending me a postcard from your hometown, mentioning which of our package(s) you are using.
