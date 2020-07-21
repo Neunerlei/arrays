@@ -49,17 +49,15 @@ class ArrayGenerator
         
         // Convert xml string to an object
         if (is_string($input)) {
-            if (stripos(trim($input), "<?xml") !== 0) {
-                $input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" . $input;
+            if (stripos(trim($input), '<?xml') !== 0) {
+                $input = '<?xml version="1.0" encoding="UTF-8"?>' . $input;
             }
             $savedState = libxml_use_internal_errors(true);
             $input      = simplexml_load_string($input);
+            $errors     = libxml_get_errors();
             libxml_use_internal_errors($savedState);
-            if ($input === false) {
-                /** @noinspection LoopWhichDoesNotLoopInspection */
-                foreach (libxml_get_errors() as $error) {
-                    throw new ArrayGeneratorException("Failed to parse XML input: " . $error->message);
-                }
+            if ($input === false || ! empty($errors)) {
+                throw new ArrayGeneratorException('Failed to parse XML input: ' . reset($errors)->message);
             }
         }
         
@@ -68,12 +66,15 @@ class ArrayGenerator
             $input = simplexml_import_dom($input);
         }
         if ($input instanceof SimpleXMLElement) {
-            $result = $this->xmlObjectToArray($input);
+            $result = [];
+            $this->xmlObjectToArray($input, $result, '', array_keys(
+                array_merge(['' => ''], $input->getNamespaces(true))
+            ));
         }
         
         // Check if we failed
         if (! isset($result)) {
-            throw new ArrayGeneratorException("The given input is not supported as XML array source!");
+            throw new ArrayGeneratorException('The given input is not supported as XML array source!');
         }
         
         // Convert to assoc array if required
@@ -116,7 +117,7 @@ class ArrayGenerator
         if (is_object($input)) {
             return get_object_vars($input);
         }
-        throw new ArrayGeneratorException("The given input is not supported as OBJECT array source!");
+        throw new ArrayGeneratorException('The given input is not supported as OBJECT array source!');
     }
     
     /**
@@ -130,7 +131,7 @@ class ArrayGenerator
      * @return array
      * @throws ArrayGeneratorException
      */
-    public function fromStringList($input, string $separator = ","): array
+    public function fromStringList($input, string $separator = ','): array
     {
         if (is_array($input)) {
             return $input;
@@ -140,35 +141,35 @@ class ArrayGenerator
         }
         if (! is_string($input) && ! is_numeric($input)
             && ! (is_object($input)
-                  && method_exists($input, "__toString"))) {
-            throw new ArrayGeneratorException("The given input " . gettype($input)
-                                              . " is not supported as STRING array source!");
+                  && method_exists($input, '__toString'))) {
+            throw new ArrayGeneratorException('The given input ' . gettype($input)
+                                              . ' is not supported as STRING array source!');
         }
-        $parts = preg_split("~(?<!\\\)" . preg_quote($separator, "~") . "~", trim((string)$input), -1,
+        $parts = preg_split('~(?<!\\\)' . preg_quote($separator, '~') . '~', trim((string)$input), -1,
             PREG_SPLIT_NO_EMPTY);
         
         return array_values(array_filter(array_map(static function ($v) use ($separator) {
             $v      = trim($v);
             $vLower = strtolower($v);
-            if ($vLower === "null") {
+            if ($vLower === 'null') {
                 return null;
             }
-            if ($vLower === "false") {
+            if ($vLower === 'false') {
                 return false;
             }
-            if ($vLower === "true") {
+            if ($vLower === 'true') {
                 return true;
             }
             if (is_numeric($vLower)) {
-                return strpos($vLower, ".") !== false ? ((float)$v) : ((int)$v);
+                return strpos($vLower, '.') !== false ? ((float)$v) : ((int)$v);
             }
             if (stripos($v, $separator) !== false) {
-                return str_replace("\\" . $separator, $separator, $v);
+                return str_replace('\\' . $separator, $separator, $v);
             }
             
             return $v;
         }, $parts), static function ($v) {
-            return $v !== "";
+            return $v !== '';
         }));
     }
     
@@ -186,8 +187,8 @@ class ArrayGenerator
     public function fromCsv(
         $input,
         bool $firstLineKeys = false,
-        string $delimiter = ",",
-        string $quote = "\""
+        string $delimiter = ',',
+        string $quote = '\"'
     ): array {
         if (is_array($input)) {
             return $input;
@@ -196,22 +197,19 @@ class ArrayGenerator
             return [];
         }
         if (! is_string($input)) {
-            throw new ArrayGeneratorException("The given input is not supported as CSV array source!");
+            throw new ArrayGeneratorException('The given input is not supported as CSV array source!');
         }
-        $lines = preg_split("/$\R?^/m", trim($input));
-        if (! is_array($lines)) {
-            throw new ArrayGeneratorException("Error while parsing CSV array source!");
-        }
+        $lines     = preg_split('/$\R?^/m', trim($input));
         $keyLength = 0;
         if ($firstLineKeys) {
             $keys      = array_shift($lines);
             $keys      = str_getcsv($keys, $delimiter, $quote);
-            $keys      = array_map("trim", $keys);
+            $keys      = array_map('trim', $keys);
             $keyLength = count($keys);
         }
         foreach ($lines as $ln => $line) {
             $line = str_getcsv($line, $delimiter, $quote);
-            $line = array_map("trim", $line);
+            $line = array_map('trim', $line);
             // No keys
             if (! isset($keys)) {
                 $lines[$ln] = $line;
@@ -247,16 +245,16 @@ class ArrayGenerator
             return [];
         }
         if (! is_string($input)) {
-            throw new ArrayGeneratorException("The given input is not supported as JSON array source!");
+            throw new ArrayGeneratorException('The given input is not supported as JSON array source!');
         }
         $input = trim($input);
-        if ($input[0] !== "{" && $input[0] !== "[") {
-            throw new ArrayGeneratorException("The given input is a string, but has no array as JSON data, so its no supported array source!");
+        if ($input[0] !== '{' && $input[0] !== '[') {
+            throw new ArrayGeneratorException('The given input is a string, but has no array as JSON data, so its no supported array source!');
         }
         try {
             $data = @json_decode($input, true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
-            Throw new ArrayGeneratorException("Error generating json: " . $e->getMessage(), $e->getCode(), $e);
+            Throw new ArrayGeneratorException('Error generating json: ' . $e->getMessage(), $e->getCode(), $e);
         }
         
         return $data;
@@ -272,30 +270,23 @@ class ArrayGenerator
      *
      * @param   \SimpleXMLElement  $xml  The xml element to traverse
      * @param   array              $parentData
-     * @param   string|NULL        $ns
-     * @param   array|NULL         $namespaces
+     * @param   string             $ns
+     * @param   array              $namespaces
      *
-     * @return array
      */
     protected function xmlObjectToArray(
         SimpleXMLElement $xml,
-        array &$parentData = [],
-        string $ns = null,
-        array $namespaces = null
-    ): array {
-        if ($ns === null) {
-            $ns = "";
-        }
-        if ($namespaces === null) {
-            $namespaces = array_keys(array_merge(["" => ""], $xml->getNamespaces(true)));
-        }
+        array &$parentData,
+        string $ns,
+        array $namespaces
+    ): void {
         $data = [];
         foreach ($namespaces as $namespace) {
             foreach ($xml->attributes($namespace, true) as $key => $value) {
                 if (! empty($namespace)) {
-                    $key = $namespace . ":" . $key;
+                    $key = $namespace . ':' . $key;
                 }
-                $data["@" . $key] = (string)$value;
+                $data['@' . $key] = (string)$value;
             }
             foreach ($xml->children($namespace, true) as $child) {
                 static::xmlObjectToArray($child, $data, $namespace, $namespaces);
@@ -303,18 +294,19 @@ class ArrayGenerator
         }
         $asString = trim((string)$xml);
         if (empty($data)) {
-            $data = ["content" => $asString];
+            $data = ['content' => $asString];
         } elseif ($asString !== '') {
-            $data["content"] = $asString;
+            $data['content'] = $asString;
         }
         if (! empty($ns)) {
-            $ns .= ":";
+            $ns .= ':';
+        } elseif (! empty($namespaces) && count($xml->getNamespaces()) === 1) {
+            $nsl = $xml->getNamespaces();
+            $ns  = key($nsl) . ':';
         }
         $name         = $ns . $xml->getName();
-        $data         = ["tag" => $name] + $data;
+        $data         = ['tag' => $name] + $data;
         $parentData[] = $data;
-        
-        return $parentData;
     }
     
     /**
@@ -333,14 +325,11 @@ class ArrayGenerator
             if (! is_array($el)) {
                 continue;
             }
-            $key = $el["tag"];
-            if (is_string($key) && $key !== '' && strpos($key, "@") === 0) {
-                continue;
-            }
+            $key = $el['tag'];
             
             // Check if there is a static content.
-            if (isset($el["content"])) {
-                $assoc[$key][] = $el["content"];
+            if (isset($el['content'])) {
+                $assoc[$key][] = $el['content'];
                 continue;
             }
             

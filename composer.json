@@ -1,45 +1,46 @@
 {
-	"name": "neunerlei/arrays",
-	"description": "A package that provides a multitude of tools to traverse, sort and modify arrays in your daily routine",
-	"type": "library",
-	"license": "Apache-2.0",
-	"authors": [
-		{
-			"name": "LABOR.digital",
-			"email": "info@labor.tools",
-			"homepage": "https://www.labor.digital",
-			"role": "Company"
-		},
-		{
-			"name": "Martin Neundorfer",
-			"email": "code@neunerlei.eu",
-			"homepage": "https://www.neunerlei.eu",
-			"role": "Developer"
-		}
-	],
-	"support": {
-		"issues": "https://github.com/neunerlei/arrays/issues",
-		"source": "https://github.com/neunerlei/arrays",
-		"docs": "https://arrays.neunerlei.eu/"
-	},
-	"require-dev": {
-		"phpunit/phpunit": "^9.0",
-		"neunerlei/dbg": "^1.8"
-	},
-	"require": {
-		"php": "^7.3",
-		"ext-dom": "*",
-		"ext-simplexml": "*",
-		"ext-json": "*",
-		"neunerlei/options": "^1.0"
-	},
-	"autoload": {
-		"psr-4": {
-			"Neunerlei\\Arrays\\": "Classes"
-		}
-	},
-	"scripts": {
-		"test": "vendor/bin/phpunit Tests"
-	},
-	"version": "1.2.0"
+    "name": "neunerlei/arrays",
+    "description": "A package that provides a multitude of tools to traverse, sort and modify arrays in your daily routine",
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "LABOR.digital",
+            "email": "info@labor.tools",
+            "homepage": "https://www.labor.digital",
+            "role": "Company"
+        },
+        {
+            "name": "Martin Neundorfer",
+            "email": "code@neunerlei.eu",
+            "homepage": "https://www.neunerlei.eu",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/neunerlei/arrays/issues",
+        "source": "https://github.com/neunerlei/arrays",
+        "docs": "https://arrays.neunerlei.eu/"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0",
+        "neunerlei/dbg": "^1.8"
+    },
+    "require": {
+        "php": "^7.3",
+        "ext-dom": "*",
+        "ext-simplexml": "*",
+        "ext-json": "*",
+        "neunerlei/options": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Neunerlei\\Arrays\\": "Classes"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit Tests",
+        "test-cover": "phpunit Tests --coverage-html Tests/Coverage"
+    },
+    "version": "1.2.0"
 }

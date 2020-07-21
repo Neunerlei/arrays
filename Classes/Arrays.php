@@ -183,30 +183,30 @@ class Arrays
         foreach ($args as $k => $arg) {
             if (is_string($arg)) {
                 $argLower = strtolower($arg);
-                if ($argLower === "nonumericmerge" || $argLower === "nn") {
+                if ($argLower === 'nonumericmerge' || $argLower === 'nn') {
                     $mergeNumeric = false;
                     continue;
                 }
                 
-                if ($argLower === "allowremoval" || $argLower === "r") {
+                if ($argLower === 'allowremoval' || $argLower === 'r') {
                     $allowRemoval = true;
                     continue;
                 }
                 
-                if ($argLower === "strictnumericmerge" || $argLower === "sn") {
+                if ($argLower === 'strictnumericmerge' || $argLower === 'sn') {
                     $strictNumericMerge = true;
                     continue;
                 }
             }
             if (! is_array($arg)) {
-                throw new ArrayException("All elements have to be arrays! FormElement $k isn't!");
+                throw new ArrayException('All elements have to be arrays! FormElement $k isn\'t!');
             }
             $argsClean[] = $arg;
         }
         $args = $argsClean;
         unset($argsClean);
         if (count($args) < 2) {
-            throw new ArrayException("At least 2 elements are required to be merged into eachother!");
+            throw new ArrayException('At least 2 elements are required to be merged into eachother!');
         }
         
         
@@ -245,7 +245,7 @@ class Arrays
             return $a;
         }
         foreach ($b as $k => $v) {
-            if ($allowRemoval && $v === "__UNSET") {
+            if ($allowRemoval && $v === '__UNSET') {
                 unset($a[$k]);
                 continue;
             }
@@ -273,12 +273,11 @@ class Arrays
      */
     public static function attach(...$args): array
     {
-        $_args = $args;
         if (count($args) < 2) {
-            throw new ArrayException("At least 2 elements are required to be attached to eachother!");
+            throw new ArrayException('At least 2 elements are required to be attached to eachother!');
         }
-        if (in_array(false, array_map("is_array", $_args), true)) {
-            throw new ArrayException("All elements have to be arrays!");
+        if (in_array(false, array_map('is_array', $args), true)) {
+            throw new ArrayException('All elements have to be arrays!');
         }
         
         $a = array_shift($args);
@@ -330,8 +329,17 @@ class Arrays
      */
     public static function insertAt(array $list, $pivotKey, $insertKey, $insertValue, bool $insertBefore = false): array
     {
-        // Remove the existing key
-        unset($list[$insertKey]);
+        // Prepare the keys to be type-safe
+        foreach ([&$pivotKey, &$insertKey] as &$val) {
+            if (is_string($val) && is_numeric($val)
+                && (string)(int)$val === (string)(float)$val) {
+                $val = (int)$val;
+            }
+        }
+        
+        
+        // Clean up
+        unset($val, $list[$insertKey]);
         
         // Check if the pivot key exists
         if (! array_key_exists($pivotKey, $list)) {
@@ -461,23 +469,23 @@ class Arrays
     public static function sortBy(array $list, string $key, array $options = []): array
     {
         $options = Options::make($options, [
-            "separator" => [
-                "type"    => "string",
-                "default" => ".",
+            'separator' => [
+                'type'    => 'string',
+                'default' => '.',
             ],
-            "desc"      => [
-                "type"    => "bool",
-                "default" => false,
+            'desc'      => [
+                'type'    => 'bool',
+                'default' => false,
             ],
         ]);
         
         // Check if it is a simple sort => Use fastlane
-        if (stripos($key, $options["separator"]) === false) {
+        if (stripos($key, $options['separator']) === false) {
             uasort($list, static function ($a, $b) use ($key) {
                 return ($a[$key] ?? null) <=> ($b[$key] ?? null);
             });
             
-            return $options["desc"] ? array_reverse($list) : $list;
+            return $options['desc'] ? array_reverse($list) : $list;
         }
         
         // Use the workaround for paths as key
@@ -485,7 +493,7 @@ class Arrays
         // So this will combine the best of two worlds together
         $sorter = [];
         foreach ($list as $k => $v) {
-            $sorter[$k] = static::getPath($list, $key, $options["separator"]);
+            $sorter[$k] = static::getPath($list, $key, $options['separator']);
         }
         asort($sorter);
         
@@ -497,7 +505,7 @@ class Arrays
         unset($sorter);
         
         // Done
-        return $options["desc"] ? array_reverse($output) : $output;
+        return $options['desc'] ? array_reverse($output) : $output;
     }
     
     /**
@@ -514,7 +522,7 @@ class Arrays
      *
      * @return array
      */
-    public static function parsePath($path, string $separator = "."): array
+    public static function parsePath($path, string $separator = '.'): array
     {
         return static::getInstance(static::$pathClass)->parsePath($path, $separator);
     }
@@ -539,7 +547,7 @@ class Arrays
      *
      * @return array
      */
-    public static function mergePaths($pathA, $pathB, ?string $separatorA = ".", ?string $separatorB = null): array
+    public static function mergePaths($pathA, $pathB, ?string $separatorA = '.', ?string $separatorB = null): array
     {
         return static::getInstance(static::$pathClass)
                      ->mergePaths($pathA, $pathB, $separatorA, $separatorB ?? $separatorA);
@@ -554,7 +562,7 @@ class Arrays
      *
      * @return bool
      */
-    public static function hasPath($input, $path, string $separator = "."): bool
+    public static function hasPath($input, $path, string $separator = '.'): bool
     {
         return static::getInstance(static::$pathClass)->has($input, $path, $separator);
     }
@@ -570,7 +578,7 @@ class Arrays
      *
      * @return array|mixed|null
      */
-    public static function getPath(array $input, $path, $default = null, string $separator = ".")
+    public static function getPath(array $input, $path, $default = null, string $separator = '.')
     {
         return static::getInstance(static::$pathClass)->get($input, $path, $default, $separator);
     }
@@ -586,7 +594,7 @@ class Arrays
      *
      * @return array
      */
-    public static function setPath(array $input, $path, $value, string $separator = "."): array
+    public static function setPath(array $input, $path, $value, string $separator = '.'): array
     {
         return static::getInstance(static::$pathClass)->set($input, $path, $value, $separator);
     }
@@ -613,18 +621,18 @@ class Arrays
     public static function removePath(array $input, $path, array $options = []): array
     {
         $options = Options::make($options, [
-            "separator" => [
-                "type"    => "string",
-                "default" => ".",
+            'separator' => [
+                'type'    => 'string',
+                'default' => '.',
             ],
-            "keepEmpty" => [
-                "type"    => "bool",
-                "default" => false,
+            'keepEmpty' => [
+                'type'    => 'bool',
+                'default' => false,
             ],
         ]);
         
         return static::getInstance(static::$pathClass)
-                     ->remove($input, $path, $options["separator"], $options["keepEmpty"]);
+                     ->remove($input, $path, $options['separator'], $options['keepEmpty']);
     }
     
     
@@ -642,7 +650,7 @@ class Arrays
      *
      * @return array
      */
-    public static function filterPath(array $input, $path, callable $callback, string $separator = "."): array
+    public static function filterPath(array $input, $path, callable $callback, string $separator = '.'): array
     {
         return static::getInstance(static::$pathClass)->filter($input, $path, $callback, $separator);
     }
@@ -729,16 +737,16 @@ class Arrays
     public static function getList(array $input, $valueKeys, ?string $keyKey = null, array $options = []): ?array
     {
         $options = Options::make($options, [
-            "default"   => null,
-            "separator" => [
-                "type"    => "string",
-                "default" => ".",
+            'default'   => null,
+            'separator' => [
+                'type'    => 'string',
+                'default' => '.',
             ],
         ]);
         
         // Prepare key key
         if (is_null($keyKey)) {
-            $keyKey = "";
+            $keyKey = '';
         }
         
         // Make sure valueKeys is an array
@@ -747,14 +755,14 @@ class Arrays
                 $valueKeys = [];
             } else {
                 if (! is_string($valueKeys)) {
-                    throw new InvalidArgumentException("The given valueKeys are invalid, only strings and arrays are allowed!");
+                    throw new InvalidArgumentException('The given valueKeys are invalid, only strings and arrays are allowed!');
                 }
                 $valueKeys = [$valueKeys];
             }
         }
         
         return static::getInstance(static::$pathClass)->getList(
-            $input, $valueKeys, $keyKey, $options["default"], $options["separator"]);
+            $input, $valueKeys, $keyKey, $options['default'], $options['separator']);
     }
     
     /**
@@ -801,19 +809,19 @@ class Arrays
     {
         // Prepare options
         $options = Options::make($options, [
-            "separator"  => [
-                "default" => ".",
-                "type"    => "string",
+            'separator'  => [
+                'default' => '.',
+                'type'    => 'string',
             ],
-            "arraysOnly" => [
-                "default" => false,
-                "type"    => "bool",
+            'arraysOnly' => [
+                'default' => false,
+                'type'    => 'bool',
             ],
         ]);
         
         // Run the flattener
         $out = [];
-        static::flattenWalker($out, $list, [], $options["separator"], $options["arraysOnly"]);
+        static::flattenWalker($out, $list, [], $options['separator'], $options['arraysOnly']);
         
         return $out;
     }
@@ -835,7 +843,7 @@ class Arrays
         bool $arraysOnly
     ): void {
         foreach ($input as $k => $v) {
-            $path[] = str_replace($separator, "\\" . $separator, $k);
+            $path[] = str_replace($separator, '\\' . $separator, $k);
             if (($arraysOnly && is_array($v)) || (! $arraysOnly && is_iterable($v))) {
                 static::flattenWalker($out, $v, $path, $separator, $arraysOnly);
             } else {
@@ -864,15 +872,15 @@ class Arrays
     {
         // Prepare options
         $options = Options::make($options, [
-            "separator" => [
-                "default" => ".",
-                "type"    => "string",
+            'separator' => [
+                'default' => '.',
+                'type'    => 'string',
             ],
         ]);
         
         $out = [];
         foreach ($list as $path => $value) {
-            $out = static::setPath($out, $path, $value, $options["separator"]);
+            $out = static::setPath($out, $path, $value, $options['separator']);
         }
         
         return $out;
@@ -958,7 +966,9 @@ class Arrays
      */
     public static function dumpToXml(array $input, bool $asString = false)
     {
+        // @codeCoverageIgnoreStart
         return static::getInstance(static::$dumperClass)->toXml($input, $asString);
+        // @codeCoverageIgnoreEnd
     }
     
     /**
@@ -982,7 +992,7 @@ class Arrays
      *
      * @return array
      */
-    public static function makeFromStringList($input, string $separator = ","): array
+    public static function makeFromStringList($input, string $separator = ','): array
     {
         return static::getInstance(static::$generatorClass)->fromStringList($input, $separator);
     }
@@ -1000,8 +1010,8 @@ class Arrays
     public static function makeFromCsv(
         $input,
         bool $firstLineKeys = false,
-        string $delimiter = ",",
-        string $quote = "\""
+        string $delimiter = ',',
+        string $quote = '"'
     ): array {
         return static::getInstance(static::$generatorClass)->fromCsv($input, $firstLineKeys, $delimiter, $quote);
     }
@@ -1033,7 +1043,7 @@ class Arrays
             return static::$instances[$className];
         }
         if (! class_exists($className)) {
-            throw new ArrayException("Failed to instantiate a class with name: $className, but I could not find it!");
+            throw new ArrayException('Failed to instantiate a class with name: $className, but I could not find it!');
         }
         
         return static::$instances[$className] = new $className();
