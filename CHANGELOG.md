@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/Neunerlei/arrays/compare/v1.2.0...v1.2.1) (2020-07-20)
+
+
+### Bug Fixes
+
+* fix lodash security warning in the docs ([60a1c92](https://github.com/Neunerlei/arrays/commit/60a1c927b864c01f011f6a48cc0ee5c5c779bd1a))
+
 ## [1.2.0](https://github.com/Neunerlei/arrays/compare/v1.1.8...v1.2.0) (2020-07-01)
 
 
