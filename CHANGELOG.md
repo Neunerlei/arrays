@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/Neunerlei/arrays/compare/v1.2.3...v1.3.0) (2020-08-09)
+
+
+### Features
+
+* remove dependency on neunerlei/options ([4100f95](https://github.com/Neunerlei/arrays/commit/4100f952c373aff5ec80951f8eb11af0a25710c3))
+
+
+### Bug Fixes
+
+* add missing tests and minor bugfixes ([f07d6f8](https://github.com/Neunerlei/arrays/commit/f07d6f834fa1a5301bbecf7c1cda09c55e146f8c))
+
 ### [1.2.3](https://github.com/Neunerlei/arrays/compare/v1.2.2...v1.2.3) (2020-08-09)
 
 ### [1.2.2](https://github.com/Neunerlei/arrays/compare/v1.2.1...v1.2.2) (2020-07-21)

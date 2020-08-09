@@ -41,5 +41,5 @@
         "test": "vendor/bin/phpunit Tests",
         "test-cover": "phpunit Tests --coverage-html Tests/Coverage"
     },
-    "version": "1.2.3"
+    "version": "1.3.0"
 }
