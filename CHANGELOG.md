@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.2](https://github.com/Neunerlei/arrays/compare/v1.2.1...v1.2.2) (2020-07-21)
+
+
+### Bug Fixes
+
+* some additional tests + bugfixing ([d06422f](https://github.com/Neunerlei/arrays/commit/d06422fdb25e0dc6e574ff14b4aaf51ed2d8bc14))
+
 ### [1.2.1](https://github.com/Neunerlei/arrays/compare/v1.2.0...v1.2.1) (2020-07-20)
 
 
