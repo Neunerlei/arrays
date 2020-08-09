@@ -22,39 +22,38 @@ namespace Neunerlei\Arrays;
 
 
 use InvalidArgumentException;
-use Neunerlei\Options\Options;
 
 class Arrays
 {
-    
+
     /**
      * The class that is used to dump arrays into serialized variants
      *
      * @var string
      */
     public static $dumperClass = ArrayDumper::class;
-    
+
     /**
      * The class used to generate arrays from other data types
      *
      * @var string
      */
     public static $generatorClass = ArrayGenerator::class;
-    
+
     /**
      * The class used to perform path actions in arrays
      *
      * @var string
      */
     public static $pathClass = ArrayPaths::class;
-    
+
     /**
      * The list of instances that are already created
      *
      * @var array
      */
     protected static $instances = [];
-    
+
     /**
      * Returns true if the given array is an associative array
      * Associative arrays have string keys instead of numbers!
@@ -70,10 +69,10 @@ class Arrays
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Returns true if the given array is sequential.
      * Sequential arrays are numeric and in order like 0 => 1, 1 => 2, 2 => 3.
@@ -86,7 +85,7 @@ class Arrays
     {
         return array_keys($list) === range(0, count($list) - 1);
     }
-    
+
     /**
      * Returns true if the given array is a numeric list of arrays.
      * Meaning:
@@ -102,7 +101,7 @@ class Arrays
     {
         return count(array_filter($list, static function ($v) { return is_array($v); })) === count($list);
     }
-    
+
     /**
      * Sorts the given list of strings by the length of the contained values
      *
@@ -119,10 +118,10 @@ class Arrays
         if ($asc) {
             $list = array_reverse($list, true);
         }
-        
+
         return static::isAssociative($list) ? $list : array_values($list);
     }
-    
+
     /**
      * Sorts the given list by the length of the key's strings
      * Similar to sortByStrLen() but sorts by key instead of the value
@@ -140,10 +139,10 @@ class Arrays
         if ($asc) {
             $list = array_reverse($list, true);
         }
-        
+
         return $list;
     }
-    
+
     /**
      * This method merges multiple arrays into each other. It will traverse elements recursively. While
      * traversing the second array ($b) all its values will be merged into the first array ($a). The values of $b will
@@ -177,7 +176,7 @@ class Arrays
         $mergeNumeric       = true;
         $strictNumericMerge = false;
         $allowRemoval       = false;
-        
+
         // Extract options and validate input
         $argsClean = [];
         foreach ($args as $k => $arg) {
@@ -187,12 +186,12 @@ class Arrays
                     $mergeNumeric = false;
                     continue;
                 }
-                
+
                 if ($argLower === 'allowremoval' || $argLower === 'r') {
                     $allowRemoval = true;
                     continue;
                 }
-                
+
                 if ($argLower === 'strictnumericmerge' || $argLower === 'sn') {
                     $strictNumericMerge = true;
                     continue;
@@ -208,17 +207,17 @@ class Arrays
         if (count($args) < 2) {
             throw new ArrayException('At least 2 elements are required to be merged into eachother!');
         }
-        
-        
+
+
         // Loop over all given arguments
         $a = array_shift($args);
         while (count($args) > 0) {
             $a = static::mergeWalker($a, array_shift($args), $mergeNumeric, $strictNumericMerge, $allowRemoval);
         }
-        
+
         return $a;
     }
-    
+
     /**
      * Internal helper that is used to do the traverse two arrays recursively and merge them into each other
      *
@@ -258,10 +257,10 @@ class Arrays
             }
             $a[$k] = $v;
         }
-        
+
         return $a;
     }
-    
+
     /**
      * This helper can be used to attach one array to the end of another.
      * This is basically [...] + [...] but without overriding numeric keys
@@ -279,7 +278,7 @@ class Arrays
         if (in_array(false, array_map('is_array', $args), true)) {
             throw new ArrayException('All elements have to be arrays!');
         }
-        
+
         $a = array_shift($args);
         while (count($args) > 0) {
             foreach (array_shift($args) as $k => $v) {
@@ -290,10 +289,10 @@ class Arrays
                 }
             }
         }
-        
+
         return $a;
     }
-    
+
     /**
      * This method can rename keys of a given array according to a given map
      * of ["keyToRename" => "RenamedKey"] as second parameter. Keys not present in $list will be ignored
@@ -311,10 +310,10 @@ class Arrays
         foreach ($list as $k => $v) {
             $result[$keysToRename[$k] ?? $k] = $v;
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Adds the given key ($insertKey) and value ($insertValue) pair either BEFORE or AFTER a $pivotKey in a $list.
      *
@@ -336,18 +335,18 @@ class Arrays
                 $val = (int)$val;
             }
         }
-        
-        
+
+
         // Clean up
         unset($val, $list[$insertKey]);
-        
+
         // Check if the pivot key exists
         if (! array_key_exists($pivotKey, $list)) {
             $list[$insertKey] = $insertValue;
-            
+
             return $list;
         }
-        
+
         // Position the new key around the the requested position
         $position        = array_search($pivotKey, array_keys($list), true);
         $before          = array_slice($list, 0, $position, true);
@@ -355,20 +354,20 @@ class Arrays
         $after           = array_slice($list, $position + 1, null, true);
         $insertKeyIsNull = is_null($insertKey);
         $insert          = $insertKeyIsNull ? [$insertValue] : [$insertKey => $insertValue];
-        
+
         // Build the output
         if ($insertKeyIsNull) {
             return $insertBefore
                 ? static::attach($before, $insert, $target, $after)
                 : static::attach($before, $target, $insert, $after);
         }
-        
+
         /** @noinspection AdditionOperationOnArraysInspection */
         return $insertBefore
             ? $before + $insert + $target + $after
             : $before + $target + $insert + $after;
     }
-    
+
     /**
      * Tiny helper which will shorten a multidimensional array until it's smallest element.
      * This is especially useful for database results.
@@ -391,10 +390,10 @@ class Arrays
         while (is_array($array) && count($array) === 1) {
             $array = reset($array);
         }
-        
+
         return $array;
     }
-    
+
     /**
      * Searches the most similar key to the given needle from the haystack
      *
@@ -409,13 +408,13 @@ class Arrays
         if (isset($haystack[$needle])) {
             return $needle;
         }
-        
+
         // Generate alternative keys
         $alternativeKeys = array_keys($haystack);
         $alternativeKeys = array_map(static function ($v) {
             return strtolower(trim((string)$v));
         }, array_combine($alternativeKeys, $alternativeKeys));
-        
+
         // Search for a similar key
         $needlePrepared = strtolower(trim($needle));
         $similarKeys    = [];
@@ -424,15 +423,15 @@ class Arrays
             $similarKeys[(int)ceil($percent)] = $alternativeKey;
         }
         ksort($similarKeys);
-        
+
         // Check for empty keys
         if (empty($similarKeys)) {
             return null;
         }
-        
+
         return array_pop($similarKeys);
     }
-    
+
     /**
      * Sorts a given multidimensional array by either a key or a path to a key, by keeping
      * the associative relations like asort would
@@ -468,46 +467,40 @@ class Arrays
      */
     public static function sortBy(array $list, string $key, array $options = []): array
     {
-        $options = Options::make($options, [
-            'separator' => [
-                'type'    => 'string',
-                'default' => '.',
-            ],
-            'desc'      => [
-                'type'    => 'bool',
-                'default' => false,
-            ],
-        ]);
-        
+        // Prepare Options
+        $separator = isset($options['separator']) && is_string($options['separator']) ? $options['separator'] : '.';
+        $desc      = array_key_exists('desc', $options) && is_bool($options['desc']) ? $options['desc'] : null;
+        $desc      = ($desc === null && in_array('desc', $options, true));
+
         // Check if it is a simple sort => Use fastlane
-        if (stripos($key, $options['separator']) === false) {
+        if (strpos($key, $separator) === false) {
             uasort($list, static function ($a, $b) use ($key) {
                 return ($a[$key] ?? null) <=> ($b[$key] ?? null);
             });
-            
-            return $options['desc'] ? array_reverse($list) : $list;
+
+            return $desc ? array_reverse($list) : $list;
         }
-        
+
         // Use the workaround for paths as key
         // This is exorbitantly faster than using arrayGetPath in the approach above.
         // So this will combine the best of two worlds together
         $sorter = [];
         foreach ($list as $k => $v) {
-            $sorter[$k] = static::getPath($list, $key, $options['separator']);
+            $sorter[$k] = static::getPath($list, $key, $separator);
         }
         asort($sorter);
-        
+
         // Sort output
         $output = [];
         foreach ($sorter as $k => $foo) {
             $output[$k] = $list[$k];
         }
         unset($sorter);
-        
+
         // Done
-        return $options['desc'] ? array_reverse($output) : $output;
+        return $desc ? array_reverse($output) : $output;
     }
-    
+
     /**
      * This method is used to convert a string into a path array.
      * It will also validate already existing path arrays.
@@ -526,7 +519,7 @@ class Arrays
     {
         return static::getInstance(static::$pathClass)->parsePath($path, $separator);
     }
-    
+
     /**
      * This method can be used to merge two paths together.
      * This becomes useful if you want to work with a dynamic part in form of an array
@@ -542,8 +535,8 @@ class Arrays
      *
      * @param   array|string  $pathA       The path to add $pathB to
      * @param   array|string  $pathB       The path to be added to $pathA
-     * @param   string        $separatorA  The separator for string paths in $pathA
-     * @param   string        $separatorB  The separator for string paths in $pathB
+     * @param   string|null   $separatorA  The separator for string paths in $pathA
+     * @param   string|null   $separatorB  The separator for string paths in $pathB
      *
      * @return array
      */
@@ -552,7 +545,7 @@ class Arrays
         return static::getInstance(static::$pathClass)
                      ->mergePaths($pathA, $pathB, $separatorA, $separatorB ?? $separatorA);
     }
-    
+
     /**
      * This method checks if a given path exists in a given $input array
      *
@@ -566,7 +559,7 @@ class Arrays
     {
         return static::getInstance(static::$pathClass)->has($input, $path, $separator);
     }
-    
+
     /**
      * This method reads a single value or multiple values (depending on the given $path) from
      * the given $input array.
@@ -582,7 +575,7 @@ class Arrays
     {
         return static::getInstance(static::$pathClass)->get($input, $path, $default, $separator);
     }
-    
+
     /**
      * This method lets you set a given value at a path of your array.
      * You can also set multiple keys to the same value at once if you use wildcards.
@@ -598,7 +591,7 @@ class Arrays
     {
         return static::getInstance(static::$pathClass)->set($input, $path, $value, $separator);
     }
-    
+
     /**
      * Removes the values at the given $path"s from the $input array.
      * It can also remove multiple values at once if you use wildcards.
@@ -620,22 +613,18 @@ class Arrays
      */
     public static function removePath(array $input, $path, array $options = []): array
     {
-        $options = Options::make($options, [
-            'separator' => [
-                'type'    => 'string',
-                'default' => '.',
-            ],
-            'keepEmpty' => [
-                'type'    => 'bool',
-                'default' => false,
-            ],
-        ]);
-        
+        // Prepare Options
+        $separator = isset($options['separator']) && is_string($options['separator'])
+            ? $options['separator'] : '.';
+        $keepEmpty = array_key_exists('keepEmpty', $options) && is_bool($options['keepEmpty'])
+            ? $options['keepEmpty'] : null;
+        $keepEmpty = ($keepEmpty === null && in_array('keepEmpty', $options, true));
+
         return static::getInstance(static::$pathClass)
-                     ->remove($input, $path, $options['separator'], $options['keepEmpty']);
+                     ->remove($input, $path, $separator, $keepEmpty);
     }
-    
-    
+
+
     /**
      * This method can be used to apply a filter to all values the given $path matches.
      * The given $callback will receive the following parameters:
@@ -654,7 +643,7 @@ class Arrays
     {
         return static::getInstance(static::$pathClass)->filter($input, $path, $callback, $separator);
     }
-    
+
     /**
      * This is a multi purpose tool to handle different scenarios when dealing with array lists.
      * It expects a list of similarly structured arrays from which data should be extracted.
@@ -736,19 +725,16 @@ class Arrays
      */
     public static function getList(array $input, $valueKeys, ?string $keyKey = null, array $options = []): ?array
     {
-        $options = Options::make($options, [
-            'default'   => null,
-            'separator' => [
-                'type'    => 'string',
-                'default' => '.',
-            ],
-        ]);
-        
+        // Prepare Options
+        $default   = $options['default'] ?? null;
+        $separator = isset($options['separator']) && is_string($options['separator'])
+            ? $options['separator'] : '.';
+
         // Prepare key key
         if (is_null($keyKey)) {
             $keyKey = '';
         }
-        
+
         // Make sure valueKeys is an array
         if (! is_array($valueKeys)) {
             if (is_null($valueKeys)) {
@@ -760,11 +746,11 @@ class Arrays
                 $valueKeys = [$valueKeys];
             }
         }
-        
+
         return static::getInstance(static::$pathClass)->getList(
-            $input, $valueKeys, $keyKey, $options['default'], $options['separator']);
+            $input, $valueKeys, $keyKey, $default, $separator);
     }
-    
+
     /**
      * Removes the given list of keys / paths from the $input array and returns the results
      *
@@ -784,10 +770,10 @@ class Arrays
         foreach ($pathsToRemove as $path) {
             $list = static::removePath($list, $path, $options);
         }
-        
+
         return $list;
     }
-    
+
     /**
      * Flattens a multidimensional array into a one dimensional array, while keeping
      * their keys as "path". So for example:
@@ -807,25 +793,20 @@ class Arrays
      */
     public static function flatten(iterable $list, array $options = []): array
     {
-        // Prepare options
-        $options = Options::make($options, [
-            'separator'  => [
-                'default' => '.',
-                'type'    => 'string',
-            ],
-            'arraysOnly' => [
-                'default' => false,
-                'type'    => 'bool',
-            ],
-        ]);
-        
+        // Prepare the options
+        $separator  = isset($options['separator']) && is_string($options['separator'])
+            ? $options['separator'] : '.';
+        $arraysOnly = array_key_exists('arraysOnly', $options) && is_bool($options['arraysOnly'])
+            ? $options['arraysOnly'] : null;
+        $arraysOnly = ($arraysOnly === null && in_array('arraysOnly', $options, true));
+
         // Run the flattener
         $out = [];
-        static::flattenWalker($out, $list, [], $options['separator'], $options['arraysOnly']);
-        
+        static::flattenWalker($out, $list, [], $separator, $arraysOnly);
+
         return $out;
     }
-    
+
     /**
      * Internal helper to recursively iterate the given $input array and flatten it's contents into an array
      *
@@ -852,7 +833,7 @@ class Arrays
             array_pop($path);
         }
     }
-    
+
     /**
      * Basically the reverse operation of flatten()
      * Converts a flattened, one-dimensional array into a multidimensional array, using
@@ -870,22 +851,18 @@ class Arrays
      */
     public static function unflatten(iterable $list, array $options = []): array
     {
-        // Prepare options
-        $options = Options::make($options, [
-            'separator' => [
-                'default' => '.',
-                'type'    => 'string',
-            ],
-        ]);
-        
+        // Prepare the options
+        $separator = isset($options['separator']) && is_string($options['separator'])
+            ? $options['separator'] : '.';
+
         $out = [];
         foreach ($list as $path => $value) {
-            $out = static::setPath($out, $path, $value, $options['separator']);
+            $out = static::setPath($out, $path, $value, $separator);
         }
-        
+
         return $out;
     }
-    
+
     /**
      * Works exactly like array_map but traverses the array recursively.
      *
@@ -901,7 +878,7 @@ class Arrays
     {
         return static::mapRecursiveWalker($list, $list, [], $callback);
     }
-    
+
     /**
      * Internal helper to recursively iterate over a given $list and execute a callback for ever child of it.
      *
@@ -929,10 +906,10 @@ class Arrays
             $output[$k] = $v;
             array_pop($path);
         }
-        
+
         return $output;
     }
-    
+
     /**
      * Receives a xml-input and converts it into a multidimensional array
      *
@@ -952,7 +929,7 @@ class Arrays
     {
         return static::getInstance(static::$generatorClass)->fromXml($input, $asAssocArray);
     }
-    
+
     /**
      * This is the counterpart of Arrays::makeFromXml() which takes it's output
      * and converts it back into a stringified XML format.
@@ -970,7 +947,7 @@ class Arrays
         return static::getInstance(static::$dumperClass)->toXml($input, $asString);
         // @codeCoverageIgnoreEnd
     }
-    
+
     /**
      * The method receives an object of any kind and converts it into a multidimensional array
      *
@@ -982,7 +959,7 @@ class Arrays
     {
         return static::getInstance(static::$generatorClass)->fromObject($input);
     }
-    
+
     /**
      * Receives a string list like: "1,asdf,foo, bar" which will be converted into [1, "asdf", "foo", "bar"]
      * NOTE: the result is automatically trimmed and type converted into: numbers, TRUE, FALSE an null.
@@ -996,7 +973,7 @@ class Arrays
     {
         return static::getInstance(static::$generatorClass)->fromStringList($input, $separator);
     }
-    
+
     /**
      * Receives a string value and parses it as a csv into an array
      *
@@ -1015,7 +992,7 @@ class Arrays
     ): array {
         return static::getInstance(static::$generatorClass)->fromCsv($input, $firstLineKeys, $delimiter, $quote);
     }
-    
+
     /**
      * Creates an array out of a json data string. Throws an exception if an error occurred!
      * Only works with json objects or arrays. Other values will throw an exception
@@ -1028,7 +1005,7 @@ class Arrays
     {
         return static::getInstance(static::$generatorClass)->fromJson($input);
     }
-    
+
     /**
      * Internal helper to request the singleton instances of the used helper classes
      *
@@ -1045,7 +1022,7 @@ class Arrays
         if (! class_exists($className)) {
             throw new ArrayException('Failed to instantiate a class with name: $className, but I could not find it!');
         }
-        
+
         return static::$instances[$className] = new $className();
     }
 }

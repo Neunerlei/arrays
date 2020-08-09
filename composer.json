@@ -30,8 +30,7 @@
         "php": "^7.3",
         "ext-dom": "*",
         "ext-simplexml": "*",
-        "ext-json": "*",
-        "neunerlei/options": "^1.0"
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
