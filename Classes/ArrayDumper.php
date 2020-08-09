@@ -24,9 +24,12 @@ namespace Neunerlei\Arrays;
 use DOMDocument;
 use SimpleXMLElement;
 
+/**
+ * @codeCoverageIgnore
+ */
 class ArrayDumper
 {
-    
+
     /**
      * Receives the result of Arrays::makeFromXml() and converts the array back into an xml format
      *
@@ -42,18 +45,18 @@ class ArrayDumper
         if (count($array) !== 1) {
             throw new ArrayDumperException("Only arrays with a single root node can be converted into xml");
         }
-        
+
         // Helper to traverse the given array recursively
         $walker = static function (array $entry, array $path, ?SimpleXMLElement $xml, callable $walker) {
             if (! is_array($entry)) {
                 throw new ArrayDumperException("All entries have to be arrays, but " . implode(".", $path) . " isn't");
             }
-            
+
             if (! isset($entry["tag"])) {
                 throw new ArrayDumperException("All entries in an XML array have to specify a \"tag\" property, but " .
                                                implode(".", $path) . " doesn't have one");
             }
-            
+
             if ($xml === null) {
                 $child = $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?><"
                                                      . $entry["tag"] . "/>");
@@ -61,7 +64,7 @@ class ArrayDumper
                 $child = $xml->addChild($entry["tag"],
                     isset($entry["content"]) ? htmlspecialchars($entry["content"]) : null);
             }
-            
+
             foreach ($entry as $prop => $value) {
                 if ($prop === "tag" || $prop === "content") {
                     continue;
@@ -79,24 +82,24 @@ class ArrayDumper
                     throw new ArrayDumperException("Invalid entry prop: " . $prop . " at " . implode(".", $path));
                 }
             }
-            
+
             return $xml;
         };
-        
+
         // Start the recursive array traversing
         $xml = $walker($array[0], [], null, $walker);
-        
+
         // Return the xml if we don't want a string
         if (! $asString) {
             return $xml;
         }
-        
+
         // Format the output
         $xmlDocument                     = new DOMDocument('1.0', "utf-8");
         $xmlDocument->formatOutput       = true;
         $xmlDocument->preserveWhiteSpace = false;
         $xmlDocument->loadXML($xml === null ? '' : $xml->asXML());
-        
+
         return $xmlDocument->saveXML();
     }
 }

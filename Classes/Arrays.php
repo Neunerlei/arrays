@@ -517,7 +517,8 @@ class Arrays
      */
     public static function parsePath($path, string $separator = '.'): array
     {
-        return static::getInstance(static::$pathClass)->parsePath($path, $separator);
+        return static::getInstance(static::$pathClass)
+                     ->parsePath($path, $separator);
     }
 
     /**
@@ -557,7 +558,8 @@ class Arrays
      */
     public static function hasPath($input, $path, string $separator = '.'): bool
     {
-        return static::getInstance(static::$pathClass)->has($input, $path, $separator);
+        return static::getInstance(static::$pathClass)
+                     ->has($input, $path, $separator);
     }
 
     /**
@@ -573,7 +575,8 @@ class Arrays
      */
     public static function getPath(array $input, $path, $default = null, string $separator = '.')
     {
-        return static::getInstance(static::$pathClass)->get($input, $path, $default, $separator);
+        return static::getInstance(static::$pathClass)
+                     ->get($input, $path, $default, $separator);
     }
 
     /**
@@ -589,7 +592,8 @@ class Arrays
      */
     public static function setPath(array $input, $path, $value, string $separator = '.'): array
     {
-        return static::getInstance(static::$pathClass)->set($input, $path, $value, $separator);
+        return static::getInstance(static::$pathClass)
+                     ->set($input, $path, $value, $separator);
     }
 
     /**
@@ -927,7 +931,8 @@ class Arrays
      */
     public static function makeFromXml($input, bool $asAssocArray = false): array
     {
-        return static::getInstance(static::$generatorClass)->fromXml($input, $asAssocArray);
+        return static::getInstance(static::$generatorClass)
+                     ->fromXml($input, $asAssocArray);
     }
 
     /**
@@ -944,7 +949,8 @@ class Arrays
     public static function dumpToXml(array $input, bool $asString = false)
     {
         // @codeCoverageIgnoreStart
-        return static::getInstance(static::$dumperClass)->toXml($input, $asString);
+        return static::getInstance(static::$dumperClass)
+                     ->toXml($input, $asString);
         // @codeCoverageIgnoreEnd
     }
 
@@ -957,7 +963,8 @@ class Arrays
      */
     public static function makeFromObject($input): array
     {
-        return static::getInstance(static::$generatorClass)->fromObject($input);
+        return static::getInstance(static::$generatorClass)
+                     ->fromObject($input);
     }
 
     /**
@@ -971,7 +978,8 @@ class Arrays
      */
     public static function makeFromStringList($input, string $separator = ','): array
     {
-        return static::getInstance(static::$generatorClass)->fromStringList($input, $separator);
+        return static::getInstance(static::$generatorClass)
+                     ->fromStringList($input, $separator);
     }
 
     /**
@@ -990,7 +998,8 @@ class Arrays
         string $delimiter = ',',
         string $quote = '"'
     ): array {
-        return static::getInstance(static::$generatorClass)->fromCsv($input, $firstLineKeys, $delimiter, $quote);
+        return static::getInstance(static::$generatorClass)
+                     ->fromCsv($input, $firstLineKeys, $delimiter, $quote);
     }
 
     /**
