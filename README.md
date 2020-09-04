@@ -1,6 +1,12 @@
 # Arrays - a toolbox
+
+![Create new Release](https://github.com/Neunerlei/arrays/workflows/Create%20new%20Release/badge.svg?event=push)
+[![codecov](https://codecov.io/gh/Neunerlei/arrays/branch/master/graph/badge.svg)](https://codecov.io/gh/Neunerlei/arrays)
+[![GitHub issues](https://img.shields.io/github/issues/Neunerlei/arrays)](https://github.com/Neunerlei/arrays/issues)
+[![GitHub license](https://img.shields.io/github/license/Neunerlei/arrays)](https://github.com/Neunerlei/arrays/blob/master/LICENSE.md)
+
 A package that provides a multitude of tools to traverse, sort and modify arrays in your daily routine.
-It can create arrays based of multiple input types like XML, string lists or objects. The package also provides a 
+It can create arrays based of multiple input types like XML, string lists or objects. The package also provides a
 powerful solution to get entries from an array using a path definition. Say goodbye to "isset" and "array_key_exists".
 
 ## Installation
@@ -33,6 +39,6 @@ Special thanks goes to the folks at [LABOR.digital](https://labor.digital/) (whi
 ## Postcardware
 You're free to use this package, but if it makes it to your production environment I highly appreciate you sending me a postcard from your hometown, mentioning which of our package(s) you are using.
 
-You can find my address [here](https://www.neunerlei.eu/). 
+You can find my address [here](https://www.neunerlei.eu/).
 
-Thank you :D 
+Thank you :D
