@@ -1,6 +1,7 @@
 name: Create new Release
 
 on:
+  pull_request: true
   push:
     branches:
       - master
