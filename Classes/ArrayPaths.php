@@ -527,6 +527,10 @@ class ArrayPaths
         $default = null,
         string $separator = '.'
     ): ?array {
+        // @todo this should not return $default, because it would crash the validation
+        // if something other than null|array was given. It should also NEVER return "NULL"
+        // but an empty array instead, which would also get rid of the "?array" in favour of "array" alone.
+        // I think, however that this is a breaking change and has to wait for the next major version
         if (empty($input)) {
             return $default;
         }
