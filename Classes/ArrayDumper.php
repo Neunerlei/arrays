@@ -57,13 +57,19 @@ class ArrayDumper
                                                implode('.', $path) . " doesn't have one");
             }
 
-            if ($xml === null) {
-                $xml   = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8" standalone="yes"?><'
-                                              . $entry['tag'] . '/>');
-                $child = $xml;
+            if (! empty($entry['content'])) {
+                $content = $entry['content'];
+                if (stripos($entry['content'], '<![CDATA') !== false) {
+                    $child = $xml->addChild($entry['tag']);
+                    $node  = dom_import_simplexml($child);
+                    $node->appendChild($node->ownerDocument->createCDATASection(
+                        preg_replace('~<!\[CDATA\[(.*?)]]>~', '$1', $content)
+                    ));
+                } else {
+                    $child = $xml->addChild($entry['tag'], htmlspecialchars($content));
+                }
             } else {
-                $child = $xml->addChild($entry['tag'],
-                    isset($entry['content']) ? htmlspecialchars($entry['content']) : null);
+                $child = $xml->addChild($entry['tag']);
             }
 
             foreach ($entry as $prop => $value) {
