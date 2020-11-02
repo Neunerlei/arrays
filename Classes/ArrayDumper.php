@@ -43,43 +43,44 @@ class ArrayDumper
     {
         // Die if we got an invalid node
         if (count($array) !== 1) {
-            throw new ArrayDumperException("Only arrays with a single root node can be converted into xml");
+            throw new ArrayDumperException('Only arrays with a single root node can be converted into xml');
         }
 
         // Helper to traverse the given array recursively
         $walker = static function (array $entry, array $path, ?SimpleXMLElement $xml, callable $walker) {
             if (! is_array($entry)) {
-                throw new ArrayDumperException("All entries have to be arrays, but " . implode(".", $path) . " isn't");
+                throw new ArrayDumperException('All entries have to be arrays, but ' . implode('.', $path) . " isn't");
             }
 
-            if (! isset($entry["tag"])) {
-                throw new ArrayDumperException("All entries in an XML array have to specify a \"tag\" property, but " .
-                                               implode(".", $path) . " doesn't have one");
+            if (! isset($entry['tag'])) {
+                throw new ArrayDumperException('All entries in an XML array have to specify a "tag" property, but ' .
+                                               implode('.', $path) . " doesn't have one");
             }
 
             if ($xml === null) {
-                $child = $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?><"
-                                                     . $entry["tag"] . "/>");
+                $xml   = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8" standalone="yes"?><'
+                                              . $entry['tag'] . '/>');
+                $child = $xml;
             } else {
-                $child = $xml->addChild($entry["tag"],
-                    isset($entry["content"]) ? htmlspecialchars($entry["content"]) : null);
+                $child = $xml->addChild($entry['tag'],
+                    isset($entry['content']) ? htmlspecialchars($entry['content']) : null);
             }
 
             foreach ($entry as $prop => $value) {
-                if ($prop === "tag" || $prop === "content") {
+                if ($prop === 'tag' || $prop === 'content') {
                     continue;
                 }
                 if (! is_string($prop)) {
                     $pathLocal   = $path;
-                    $pathLocal[] = $entry["tag"];
-                    if (! isset($value["tag"])) {
+                    $pathLocal[] = $entry['tag'];
+                    if (! isset($value['tag'])) {
                         $pathLocal[] = $prop;
                     }
                     $walker($value, $pathLocal, $child, $walker);
-                } elseif (strpos($prop, "@") === 0) {
+                } elseif (strncmp($prop, '@', 1) === 0) {
                     $child->addAttribute(substr($prop, 1), $value);
                 } else {
-                    throw new ArrayDumperException("Invalid entry prop: " . $prop . " at " . implode(".", $path));
+                    throw new ArrayDumperException('Invalid entry prop: ' . $prop . ' at ' . implode('.', $path));
                 }
             }
 
@@ -95,7 +96,7 @@ class ArrayDumper
         }
 
         // Format the output
-        $xmlDocument                     = new DOMDocument('1.0', "utf-8");
+        $xmlDocument                     = new DOMDocument('1.0', 'utf-8');
         $xmlDocument->formatOutput       = true;
         $xmlDocument->preserveWhiteSpace = false;
         $xmlDocument->loadXML($xml === null ? '' : $xml->asXML());
