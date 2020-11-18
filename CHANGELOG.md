@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.6](https://github.com/Neunerlei/arrays/compare/v1.3.5...v1.3.6) (2020-11-18)
+
+
+### Bug Fixes
+
+* **ArrayDumper:** create $xml root if required ([adfe86e](https://github.com/Neunerlei/arrays/commit/adfe86e2b51b688ada9a2ebcffda7fdd687df38c))
+
 ### [1.3.5](https://github.com/Neunerlei/arrays/compare/v1.3.4...v1.3.5) (2020-11-02)
 
 
