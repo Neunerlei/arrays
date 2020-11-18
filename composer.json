@@ -42,5 +42,5 @@
         "test-cover-clover": "phpunit --coverage-clover Tests/Coverage.xml",
         "test-cover": "phpunit Tests --coverage-html Tests/Coverage"
     },
-    "version": "1.3.5"
+    "version": "1.3.6"
 }
