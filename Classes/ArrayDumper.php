@@ -62,7 +62,11 @@ class ArrayDumper
                     '<?xml version="1.0" encoding="utf-8" standalone="yes"?><' . $entry['tag'] . '/>');
             }
 
-            if (! empty($entry['content'])) {
+            if ($xml === null) {
+                $xml   = new SimpleXMLElement(
+                    '<?xml version="1.0" encoding="utf-8" standalone="yes"?><' . $entry['tag'] . '/>');
+                $child = $xml;
+            } elseif (! empty($entry['content'])) {
                 $content = $entry['content'];
                 if (stripos($entry['content'], '<![CDATA') !== false) {
                     $child = $xml->addChild($entry['tag']);
