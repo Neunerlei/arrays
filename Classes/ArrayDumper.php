@@ -57,6 +57,11 @@ class ArrayDumper
                                                implode('.', $path) . " doesn't have one");
             }
 
+            if ($xml === null) {
+                $xml = new SimpleXMLElement(
+                    '<?xml version="1.0" encoding="utf-8" standalone="yes"?><' . $entry['tag'] . '/>');
+            }
+
             if (! empty($entry['content'])) {
                 $content = $entry['content'];
                 if (stripos($entry['content'], '<![CDATA') !== false) {
