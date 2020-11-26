@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.8](https://github.com/Neunerlei/arrays/compare/v1.3.7...v1.3.8) (2020-11-26)
+
+
+### Bug Fixes
+
+* **ArrayDumper:** prevent double root xml element ([27fd262](https://github.com/Neunerlei/arrays/commit/27fd262b6d4c1e423c843ba4c53536167e193670))
+
 ### [1.3.7](https://github.com/Neunerlei/arrays/compare/v1.3.6...v1.3.7) (2020-11-18)
 
 
