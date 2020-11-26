@@ -58,11 +58,6 @@ class ArrayDumper
             }
 
             if ($xml === null) {
-                $xml = new SimpleXMLElement(
-                    '<?xml version="1.0" encoding="utf-8" standalone="yes"?><' . $entry['tag'] . '/>');
-            }
-
-            if ($xml === null) {
                 $xml   = new SimpleXMLElement(
                     '<?xml version="1.0" encoding="utf-8" standalone="yes"?><' . $entry['tag'] . '/>');
                 $child = $xml;
