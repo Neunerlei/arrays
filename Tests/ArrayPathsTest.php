@@ -583,12 +583,31 @@ class ArrayPathsTest extends TestCase
                 ['a' => 'b', 'b' => 'c'],
             ],
             [
+                // This can't work because non array children are simply ignored
                 [['a' => 'b', 'b' => 'c'], ['d']],
                 [],
             ],
             [
                 [['a' => ['b' => 1], 'b' => ['c' => 2]], ['d']],
-                [],
+                [null, null],
+            ],
+            // This option tests how normal fields aliases are handled
+            [
+                [
+                    [
+                        ['foo' => 1, 'bar' => 'a'],
+                        ['foo' => 2, 'bar' => 'a'],
+                        ['foo' => 3, 'bar' => 'a'],
+                    ],
+                    [
+                        'foo as bar',
+                    ],
+                ],
+                [
+                    ['bar' => 1],
+                    ['bar' => 2],
+                    ['bar' => 3],
+                ],
             ],
         ];
     }

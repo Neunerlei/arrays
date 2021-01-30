@@ -33,6 +33,10 @@ use RuntimeException;
  */
 class ArrayPaths
 {
+    /**
+     * If this value is used in a getList value key, the second part will be used as "alias"
+     */
+    public const GET_LIST_ALIAS_SEPARATOR = ' as ';
 
     /**
      * The list of additional characters that can be escaped when a path is parsed
@@ -508,13 +512,14 @@ class ArrayPaths
         }
     }
 
+
     /**
-     * @param   array       $input      The input array to gather the list from. Should be a list of arrays.
-     * @param   array       $valueKeys  The list of value keys to extract from the list, can contain sub-paths
-     *                                  like seen in example 4
-     * @param   string      $keyKey     Optional key or sub-path which will be used as key in the result array
-     * @param   null|mixed  $default    The default value if a key was not found in $input.
-     * @param   string      $separator  A separator which is used when splitting string paths
+     * @param   array        $input      The input array to gather the list from. Should be a list of arrays.
+     * @param   array        $valueKeys  The list of value keys to extract from the list, can contain sub-paths
+     *                                   like seen in example 4
+     * @param   string|null  $keyKey     Optional key or sub-path which will be used as key in the result array
+     * @param   mixed|null   $default    The default value if a key was not found in $input.
+     * @param   string       $separator  A separator which is used when splitting string paths
      *
      * @return array|null
      * @throws \InvalidArgumentException
@@ -523,135 +528,126 @@ class ArrayPaths
     public function getList(
         array $input,
         array $valueKeys,
-        string $keyKey = '',
+        ?string $keyKey = null,
         $default = null,
         string $separator = '.'
     ): array {
+        $result = [];
+
         if (empty($input)) {
-            return [];
+            return $result;
         }
 
         if (isset($valueKeys[0]) && $valueKeys[0] === '*') {
             $valueKeys = [];
         }
 
-        // Prepare working variables
-        $result           = [];
-        $hasKeyKey        = ! empty($keyKey);
-        $isSingleValueKey = count($valueKeys) === 1;
-
         // Handle Wildcards
         if (empty($valueKeys)) {
-            if (! $hasKeyKey) {
+            if (empty($keyKey)) {
                 return $input;
             }
+
             foreach ($input as $row) {
-                $result[$this->get($row, $keyKey, null, $separator)] = $row;
+                $result[$this->get($row, $keyKey, count($result), $separator)] = $row;
             }
 
             return $result;
         }
 
-        // Add key key to the list of required keys
-        $keyKeyWasInjected = false;
-        if ($hasKeyKey && ! in_array($keyKey, $valueKeys, true)) {
-            $valueKeys[]       = $keyKey;
+        // Internal helper to generate a definition for a single list key
+        $keyDefinitionGenerator = function (string $key) use ($separator): array {
+            $alias = $key;
+
+            // Extract an alias value
+            if (strpos($key, static::GET_LIST_ALIAS_SEPARATOR) !== false) {
+                $vParts = explode(static::GET_LIST_ALIAS_SEPARATOR, $key);
+                $alias  = array_pop($vParts);
+                $key    = implode(static::GET_LIST_ALIAS_SEPARATOR, $vParts);
+            }
+
+            return [
+                'alias'  => $alias,
+                'key'    => $key,
+                'isPath' => strpos($key, $separator) !== false && count($this->parsePath($key)) > 1,
+            ];
+        };
+
+        // Build the mapping definition
+        $map               = array_map($keyDefinitionGenerator, $valueKeys);
+        $isSingleKeyPerRow = count($map) === 1;
+
+        // Check if we need to inject the key key manually
+        if (! empty($keyKey)
+            && ! in_array($keyKey,
+                array_reduce(
+                    $map,
+                    static function ($i, $v) {
+                        return array_merge($i, [$v['key']]);
+                    }, []
+                ), true)
+        ) {
             $keyKeyWasInjected = true;
+            array_unshift($map, $keyDefinitionGenerator($keyKey));
         }
 
+        // Remove linked lists
+        unset($keyDefinitionGenerator);
 
-        // This block checks if we have to resolve keys which are sub-paths in the current array list.
-        // It is possible to define a valueKey like sub.array.id to extract that deeper level's
-        // information and put it into the current context. The key will be the same as the path,
-        // in our case: "sub.array.id", if we want something more speaking we can
-        // define an alias like sub.array.id as myId. Now the value will show up with myId as key.
-        // This block prepares the parsing, so we don't have to do it in every loop
-        $keyAliasMap     = [];
-        $simpleValueKeys = $keyAliasMap;
-        $pathValueKeys   = $simpleValueKeys;
-        array_map(static function ($v) use (
-            $separator,
-            &$pathValueKeys,
-            &$simpleValueKeys,
-            &$keyAliasMap,
-            $isSingleValueKey
-        ) {
-            // Store the alias
-            $alias          = $v;
-            $vOrg           = $alias;
-            $aliasSeparator = ' as ';
-            if (stripos($v, $separator) !== false) {
-                // Check for an alias || Ignore when only one value will be returned -> save performance (a bit at least)
-                if (! $isSingleValueKey && stripos($v, $aliasSeparator) !== false) {
-                    $v     = explode($aliasSeparator, $v);
-                    $alias = array_pop($v);
-                    $v     = implode($aliasSeparator, $v);
-                }
-                $pathValueKeys[$alias] = $v;
-                $simpleValueKeys[]     = $alias;
-            } else {
-                $simpleValueKeys[] = $v;
-            }
-            $keyAliasMap[$vOrg] = $alias;
-        }, $valueKeys);
-        $simpleValueKeys = array_fill_keys($simpleValueKeys, $default);
-
-        // Loop over the list of rows
-        $emptyMarker = '__EMPTY__93223asd912__';
-        foreach ($input as $row) {
-            // Skip if we didn't get an array
+        // Build the result set from the input row
+        foreach ($input as $initialRowKey => $row) {
+            // Ignore if row is no array
             if (! is_array($row)) {
                 continue;
             }
 
-            // Only simple value keys -> use the fast lane
-            $rowValues = array_intersect_key($row, $simpleValueKeys);
+            // Prepare the row
+            $rowResult = [];
+            $rowKey    = null;
 
-            // Contains path value keys -> also gather their values
-            foreach ($pathValueKeys as $alias => $pathValueKey) {
-                // Read the path value from the current context
-                $value = $this->get($row, $pathValueKey, $emptyMarker, $separator);
-                if ($value !== $emptyMarker) {
-                    $rowValues[$alias] = $value;
-                }
-            }
+            foreach ($map as $def) {
+                $key = $def['key'];
 
-            // Check if we are completely empty
-            if (empty($rowValues)) {
-                continue;
-            }
-
-            // Get key key
-            $keyKeyValue = $hasKeyKey ? $rowValues[$keyAliasMap[$keyKey]] : null;
-
-            // Check if we have a single value key -> strip the surrounding array
-            if ($isSingleValueKey) {
-                // Remove if the key key was injected and not part of the requested columns
-                if ($keyKeyWasInjected) {
-                    unset($rowValues[$keyAliasMap[$keyKey]]);
+                if ($def['isPath']) {
+                    $value = $this->get($row, $key, $default, $separator);
+                } elseif (array_key_exists($key, $row)) {
+                    $value = $row[$key];
+                } else {
+                    $value = $default;
                 }
 
-                // Extract first value
-                $rowValues = reset($rowValues);
+                if ($def['alias'] === $keyKey) {
+                    $rowKey = $value;
+
+                    if (isset($keyKeyWasInjected)) {
+                        continue;
+                    }
+                }
+
+                // Break if we just have a single result in a row
+                // The injected key key always comes first, so it could never be ignored
+                // If an alias was given for the field -> we force the output of an array,
+                // otherwise the alias would be rather pointless
+                if ($isSingleKeyPerRow && $key === $def['alias']) {
+                    $rowResult = $value;
+                    break;
+                }
+
+                $rowResult[$def['alias']] = $value;
+            }
+
+            // Either auto-extend the numeric index or inject the row key we resolved
+            if ($rowKey === null) {
+                $result[] = $rowResult;
             } else {
-                // Fill up with default values (if we are missing some)
-                $rowValues = array_merge($simpleValueKeys, $rowValues);
-
-                // Remove if the key key was injected and not part of the requested columns
-                if ($keyKeyWasInjected) {
-                    unset($rowValues[$keyAliasMap[$keyKey]]);
-                }
+                $result[$rowKey] = $rowResult;
             }
 
-            // Append to result
-            if ($hasKeyKey && ! empty($keyKeyValue)) {
-                $result[$keyKeyValue] = $rowValues;
-            } else {
-                $result[] = $rowValues;
-            }
+            unset($rowResult, $def);
+
         }
+        unset($map);
 
-        // Done
         return $result;
     }
 

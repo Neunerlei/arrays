@@ -717,7 +717,7 @@ class Arrays
      * @param   array              $input      The input array to gather the list from. Should be a list of arrays.
      * @param   array|string|null  $valueKeys  The list of value keys to extract from the input list, or a single key
      *                                         as a string, can contain sub-paths like seen in example 4
-     * @param   string             $keyKey     Optional key or sub-path which will be used as key in the result array
+     * @param   string|null        $keyKey     Optional key or sub-path which will be used as key in the result array
      * @param   array              $options    Additional configuration options:
      *                                         - default (mixed) NULL: The default value if a key was not found in
      *                                         $input.
@@ -726,18 +726,14 @@ class Arrays
      *                                         paths
      *
      * @return array|null
+     *
+     * @todo $valueKeys should become an array|null type in the next major release
      */
     public static function getList(array $input, $valueKeys, ?string $keyKey = null, array $options = []): ?array
     {
         // Prepare Options
         $default   = $options['default'] ?? null;
-        $separator = isset($options['separator']) && is_string($options['separator'])
-            ? $options['separator'] : '.';
-
-        // Prepare key key
-        if ($keyKey === null) {
-            $keyKey = '';
-        }
+        $separator = isset($options['separator']) && is_string($options['separator']) ? $options['separator'] : '.';
 
         // Make sure valueKeys is an array
         if (! is_array($valueKeys)) {
@@ -747,7 +743,7 @@ class Arrays
                 if (! is_string($valueKeys)) {
                     throw new InvalidArgumentException('The given valueKeys are invalid, only strings and arrays are allowed!');
                 }
-                $valueKeys = [$valueKeys];
+                $valueKeys = static::makeFromStringList($valueKeys);
             }
         }
 
