@@ -526,14 +526,11 @@ class ArrayPaths
         string $keyKey = '',
         $default = null,
         string $separator = '.'
-    ): ?array {
-        // @todo this should not return $default, because it would crash the validation
-        // if something other than null|array was given. It should also NEVER return "NULL"
-        // but an empty array instead, which would also get rid of the "?array" in favour of "array" alone.
-        // I think, however that this is a breaking change and has to wait for the next major version
+    ): array {
         if (empty($input)) {
-            return $default;
+            return [];
         }
+
         if (isset($valueKeys[0]) && $valueKeys[0] === '*') {
             $valueKeys = [];
         }
@@ -569,7 +566,9 @@ class ArrayPaths
         // in our case: "sub.array.id", if we want something more speaking we can
         // define an alias like sub.array.id as myId. Now the value will show up with myId as key.
         // This block prepares the parsing, so we don't have to do it in every loop
-        $pathValueKeys = $simpleValueKeys = $keyAliasMap = [];
+        $keyAliasMap     = [];
+        $simpleValueKeys = $keyAliasMap;
+        $pathValueKeys   = $simpleValueKeys;
         array_map(static function ($v) use (
             $separator,
             &$pathValueKeys,
@@ -578,7 +577,8 @@ class ArrayPaths
             $isSingleValueKey
         ) {
             // Store the alias
-            $vOrg           = $alias = $v;
+            $alias          = $v;
+            $vOrg           = $alias;
             $aliasSeparator = ' as ';
             if (stripos($v, $separator) !== false) {
                 // Check for an alias || Ignore when only one value will be returned -> save performance (a bit at least)
@@ -635,7 +635,6 @@ class ArrayPaths
                 $rowValues = reset($rowValues);
             } else {
                 // Fill up with default values (if we are missing some)
-                /** @noinspection SlowArrayOperationsInLoopInspection */
                 $rowValues = array_merge($simpleValueKeys, $rowValues);
 
                 // Remove if the key key was injected and not part of the requested columns
