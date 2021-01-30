@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/Neunerlei/arrays/compare/v1.3.8...v2.0.0) (2021-01-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **getList:** getList() no longer returns $default on empty input
+
+### Features
+
+* implement dumpToJson helper ([905b4e1](https://github.com/Neunerlei/arrays/commit/905b4e146880d0ac37414135076176ab933a1ec3))
+
+
+### Bug Fixes
+
+* **getList:** fix return value on empty $input ([abc4307](https://github.com/Neunerlei/arrays/commit/abc4307fcb6591661ec88e8ea8274709f7aa59b8))
+
 ### [1.3.8](https://github.com/Neunerlei/arrays/compare/v1.3.7...v1.3.8) (2020-11-26)
 
 
