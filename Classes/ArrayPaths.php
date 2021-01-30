@@ -30,6 +30,8 @@ use RuntimeException;
  *
  * @package Neunerlei\Arrays
  * @internal
+ * @todo    this could be moved into a trait and even broken up further for better readability it would also remove a
+ *          lot of overhead
  */
 class ArrayPaths
 {

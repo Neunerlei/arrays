@@ -27,6 +27,13 @@ use SimpleXMLElement;
 use stdClass;
 use Throwable;
 
+/**
+ * Class ArrayGenerator
+ *
+ * @package Neunerlei\Arrays
+ * @todo    this could be moved into a trait and even broken up further for better readability it would also remove a
+ *          lot of overhead
+ */
 class ArrayGenerator
 {
     /**
@@ -46,7 +53,7 @@ class ArrayGenerator
         if (empty($input)) {
             return [];
         }
-        
+
         // Convert xml string to an object
         if (is_string($input)) {
             if (stripos(trim($input), '<?xml') !== 0) {
@@ -60,7 +67,7 @@ class ArrayGenerator
                 throw new ArrayGeneratorException('Failed to parse XML input: ' . reset($errors)->message);
             }
         }
-        
+
         // Convert xml objects into arrays
         if ($input instanceof DOMNode) {
             $input = simplexml_import_dom($input);
@@ -71,21 +78,21 @@ class ArrayGenerator
                 array_merge(['' => ''], $input->getNamespaces(true))
             ));
         }
-        
+
         // Check if we failed
         if (! isset($result)) {
             throw new ArrayGeneratorException('The given input is not supported as XML array source!');
         }
-        
+
         // Convert to assoc array if required
         if (! $asAssocArray) {
             return $result;
         }
-        
+
         // Convert the array
         return $this->xmlArrayToAssoc($result);
     }
-    
+
     /**
      * The method receives an object of sorts and converts it into a multidimensional array
      *
@@ -111,7 +118,7 @@ class ArrayGenerator
             foreach ($input as $k => $v) {
                 $out[$k] = $v;
             }
-            
+
             return $out;
         }
         if (is_object($input)) {
@@ -119,7 +126,7 @@ class ArrayGenerator
         }
         throw new ArrayGeneratorException('The given input is not supported as OBJECT array source!');
     }
-    
+
     /**
      * Receives a string list like: "1,asdf,foo, bar" which will be converted into [1, "asdf", "foo", "bar"]
      * Note the automatic trimming and value conversion of numbers, TRUE, FALSE an null.
@@ -147,7 +154,7 @@ class ArrayGenerator
         }
         $parts = preg_split('~(?<!\\\)' . preg_quote($separator, '~') . '~', trim((string)$input), -1,
             PREG_SPLIT_NO_EMPTY);
-        
+
         return array_values(array_filter(array_map(static function ($v) use ($separator) {
             $v      = trim($v);
             $vLower = strtolower($v);
@@ -166,13 +173,13 @@ class ArrayGenerator
             if (stripos($v, $separator) !== false) {
                 return str_replace('\\' . $separator, $separator, $v);
             }
-            
+
             return $v;
         }, $parts), static function ($v) {
             return $v !== '';
         }));
     }
-    
+
     /**
      * Receives a string value and parses it as a csv into an array
      *
@@ -223,10 +230,10 @@ class ArrayGenerator
             // Apply key length to line
             $lines[$ln] = array_combine($keys, array_pad(array_slice($line, 0, $keyLength), $keyLength, null));
         }
-        
+
         return $lines;
     }
-    
+
     /**
      * Creates an array out of a json data string.
      * Only works with json objects or arrays. Other values will throw an exception
@@ -254,12 +261,12 @@ class ArrayGenerator
         try {
             $data = @json_decode($input, true, 512, JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
-            Throw new ArrayGeneratorException('Error generating json: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new ArrayGeneratorException('Error generating json: ' . $e->getMessage(), $e->getCode(), $e);
         }
-        
+
         return $data;
     }
-    
+
     /**
      * This method is basically a slightly adjusted clone of cakephp's xml::_toArray method
      * It recursively converts a given xml tree into an associative php array
@@ -308,7 +315,7 @@ class ArrayGenerator
         $data         = ['tag' => $name] + $data;
         $parentData[] = $data;
     }
-    
+
     /**
      * Internal helper that is used to convert an xml result array to a
      * more readable associative array. Be careful with this! There might be sideEffects,
@@ -326,27 +333,27 @@ class ArrayGenerator
                 continue;
             }
             $key = $el['tag'];
-            
+
             // Check if there is a static content.
             if (isset($el['content'])) {
                 $assoc[$key][] = $el['content'];
                 continue;
             }
-            
+
             // Recursively convert the children to an assoc array
             $assoc[$key] = $this->xmlArrayToAssoc($el);
         }
-        
+
         // Make sure we make the object as easy to read as possible
         // We will strip out all wrapper arrays that we don't need, when we only have a single child.
         $assoc = array_map(static function ($el) {
             if (count($el) === 1 && ! is_array(reset($el)) && is_numeric(key($el))) {
                 return reset($el);
             }
-            
+
             return $el;
         }, $assoc);
-        
+
         // Done
         return $assoc;
     }

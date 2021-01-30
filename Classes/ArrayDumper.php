@@ -24,6 +24,13 @@ namespace Neunerlei\Arrays;
 use DOMDocument;
 use SimpleXMLElement;
 
+/**
+ * Class ArrayDumper
+ *
+ * @package Neunerlei\Arrays
+ * @todo    this could be moved into a trait and even broken up further for better readability it would also remove a
+ *          lot of overhead
+ */
 class ArrayDumper
 {
     /**
