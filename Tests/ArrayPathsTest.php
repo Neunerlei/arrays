@@ -572,7 +572,7 @@ class ArrayPathsTest extends TestCase
         return [
             [
                 [[], ['foo', 'bar']],
-                null,
+                [],
             ],
             [
                 [['a' => 'b', 'b' => 'c'], []],
