@@ -17,13 +17,14 @@
  */
 
 module.exports = {
-	title: "Arrays",
-	themeConfig: {
-		sidebar: [
-			"/",
-			"/guide/GeneralHelpers",
-			"/guide/PathAccess",
-			"/guide/ArrayGeneration"
-		]
-	}
+    title: 'Arrays',
+    themeConfig: {
+        sidebar: [
+            '/',
+            '/guide/GeneralHelpers',
+            '/guide/PathAccess',
+            '/guide/ArrayGeneration',
+            '/guide/ArrayDumping'
+        ]
+    }
 };
