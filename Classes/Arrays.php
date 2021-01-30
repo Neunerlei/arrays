@@ -735,13 +735,13 @@ class Arrays
             ? $options['separator'] : '.';
 
         // Prepare key key
-        if (is_null($keyKey)) {
+        if ($keyKey === null) {
             $keyKey = '';
         }
 
         // Make sure valueKeys is an array
         if (! is_array($valueKeys)) {
-            if (is_null($valueKeys)) {
+            if ($valueKeys === null) {
                 $valueKeys = [];
             } else {
                 if (! is_string($valueKeys)) {
@@ -1013,6 +1013,36 @@ class Arrays
     public static function makeFromJson($input): array
     {
         return static::getInstance(static::$generatorClass)->fromJson($input);
+    }
+
+    /**
+     * Dumps the given array as JSON string.
+     *
+     * @param   array  $input    The array to convert to json
+     * @param   array  $options  Additional configuration options for the encoding
+     *                           - pretty bool (FALSE): If set to TRUE the JSON will be generated pretty printed
+     *                           - options int (0): Bitmask consisting of one or multiple of the JSON_ constants.
+     *                           The behaviour of these constants is described on the JSON constants page.
+     *                           JSON_THROW_ON_ERROR is set by default for all operations
+     *                           - depth int (512): User specified recursion depth.
+     *
+     * @return string
+     * @throws \JsonException if the encoding fails
+     * @see          \json_encode() for possible options
+     * @see          https://php.net/manual/en/function.json-encode.php
+     * @noinspection PhpDocRedundantThrowsInspection
+     */
+    public static function dumpToJson(array $input, array $options = []): string
+    {
+        return call_user_func(
+            [
+                static::getInstance(static::$dumperClass),
+                $options['pretty'] ?? false || in_array('pretty', $options, true) ? 'toJsonPretty' : 'toJson',
+            ],
+            $input,
+            $options['options'] ?? 0,
+            $options['depth'] ?? 512
+        );
     }
 
     /**

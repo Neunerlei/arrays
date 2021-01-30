@@ -24,11 +24,42 @@ namespace Neunerlei\Arrays;
 use DOMDocument;
 use SimpleXMLElement;
 
-/**
- * @codeCoverageIgnore
- */
 class ArrayDumper
 {
+    /**
+     * Dumps the given array as JSON string.
+     * Simply a wrapper around json_encode to throw errors if the encoding fails
+     *
+     * @param   array  $array    The array to convert to json
+     * @param   int    $options  Bitmask consisting of one or multiple of the JSON_ constants.
+     *                           The behaviour of these constants is described on the JSON constants page.
+     * @param   int    $depth    User specified recursion depth.
+     *
+     * @return string
+     * @throws \JsonException
+     * @see \json_encode() for possible options
+     * @see https://php.net/manual/en/function.json-encode.php
+     */
+    public function toJson(array $array, int $options = 0, int $depth = 512): string
+    {
+        return json_encode($array, $options | JSON_THROW_ON_ERROR, $depth);
+    }
+
+    /**
+     * Dumps the given array as pretty printed JSON string.
+     *
+     * @param   array  $array    The array to convert to json
+     * @param   int    $options  Bitmask consisting of one or multiple of the JSON_ constants.
+     *                           The behaviour of these constants is described on the JSON constants page.
+     * @param   int    $depth    User specified recursion depth.
+     *
+     * @return string
+     * @see \Neunerlei\Arrays\ArrayDumper::toJson()
+     */
+    public function toJsonPretty(array $array, int $options = 0, int $depth = 512): string
+    {
+        return $this->toJson($array, $options | JSON_PRETTY_PRINT, $depth);
+    }
 
     /**
      * Receives the result of Arrays::makeFromXml() and converts the array back into an xml format
@@ -38,6 +69,7 @@ class ArrayDumper
      *
      * @return \SimpleXMLElement|string
      * @throws \Neunerlei\Arrays\ArrayDumperException
+     * @codeCoverageIgnore
      */
     public function toXml(array $array, bool $asString = false)
     {
