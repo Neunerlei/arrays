@@ -42,5 +42,5 @@
         "test-cover-clover": "phpunit --coverage-clover Tests/Coverage.xml",
         "test-cover": "phpunit Tests --coverage-html Tests/Coverage"
     },
-    "version": "2.0.2"
+    "version": "3.0.0"
 }
