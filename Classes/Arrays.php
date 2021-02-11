@@ -237,7 +237,7 @@ class Arrays
         bool $strictNumericMerge,
         bool $allowRemoval
     ): array {
-        if (empty($a)) {
+        if (! $allowRemoval && empty($a)) {
             return $b;
         }
         if (empty($b)) {
