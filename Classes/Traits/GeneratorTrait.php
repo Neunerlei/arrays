@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright 2020 Martin Neundorfer (Neunerlei)
+/*
+ * Copyright 2021 LABOR.digital
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,42 +14,247 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2020.02.27 at 10:57
+ * Last modified: 2021.02.11 at 19:15
  */
+
 declare(strict_types=1);
 
-namespace Neunerlei\Arrays;
+
+namespace Neunerlei\Arrays\Traits;
 
 
 use DOMNode;
 use Iterator;
+use Neunerlei\Arrays\ArrayGeneratorException;
 use SimpleXMLElement;
 use stdClass;
 use Throwable;
 
-/**
- * Class ArrayGenerator
- *
- * @package Neunerlei\Arrays
- * @todo    this could be moved into a trait and even broken up further for better readability it would also remove a
- *          lot of overhead
- */
-class ArrayGenerator
+trait GeneratorTrait
 {
+
     /**
-     * Receives a xml-input and converts it into a multidimensional array
+     * The method receives an object of any kind and converts it into a multidimensional array
      *
-     * @param   string|array|null|\DOMNode|\SimpleXMLElement  $input
-     * @param   bool                                          $asAssocArray
+     * @param   object  $input  Any kind of object that should be converted into an array
      *
      * @return array
      * @throws \Neunerlei\Arrays\ArrayGeneratorException
      */
-    public function fromXml($input, bool $asAssocArray = false): array
+    public static function makeFromObject($input): array
     {
         if (is_array($input)) {
             return $input;
         }
+
+        if (empty($input)) {
+            return [];
+        }
+
+        if ($input instanceof DOMNode || $input instanceof SimpleXMLElement) {
+            return static::makeFromXml($input);
+        }
+
+        if ($input instanceof Iterator || $input instanceof stdClass) {
+            $out = [];
+            foreach ($input as $k => $v) {
+                $out[$k] = $v;
+            }
+
+            return $out;
+        }
+
+        if (is_object($input)) {
+            // @todo in PHP7.4 this will no longer find properties that are not initialized
+            // should we migrate to reflection instead?
+            return get_object_vars($input);
+        }
+
+        throw new ArrayGeneratorException('The given input is not supported as OBJECT array source!');
+    }
+
+    /**
+     * Receives a string list like: "1,asdf,foo, bar" which will be converted into [1, "asdf", "foo", "bar"]
+     * NOTE: the result is automatically trimmed and type converted into: numbers, TRUE, FALSE an null.
+     *
+     * @param   string       $input      The value to convert into an array
+     * @param   string|null  $separator  The separator to split the string at. By default: ","
+     *
+     * @return array
+     * @throws \Neunerlei\Arrays\ArrayGeneratorException
+     */
+    public static function makeFromStringList($input, ?string $separator = null): array
+    {
+        if (is_array($input)) {
+            return $input;
+        }
+
+        if (empty($input) && $input !== 0) {
+            return [];
+        }
+
+        if (! is_string($input) && ! is_numeric($input)
+            && ! (is_object($input) && method_exists($input, '__toString'))
+        ) {
+            throw new ArrayGeneratorException('The given input ' . gettype($input)
+                                              . ' is not supported as STRING array source!');
+        }
+
+        $separator = $separator ?? ',';
+        $parts     = preg_split('~(?<!\\\)' . preg_quote($separator, '~') . '~', trim((string)$input), -1,
+            PREG_SPLIT_NO_EMPTY);
+
+        return array_values(array_filter(array_map(static function ($v) use ($separator) {
+            $v      = trim($v);
+            $vLower = strtolower($v);
+
+            if ($vLower === 'null') {
+                return null;
+            }
+
+            if ($vLower === 'false') {
+                return false;
+            }
+
+            if ($vLower === 'true') {
+                return true;
+            }
+
+            if (is_numeric($vLower)) {
+                return strpos($vLower, '.') !== false ? ((float)$v) : ((int)$v);
+            }
+
+            if (stripos($v, $separator) !== false) {
+                return str_replace('\\' . $separator, $separator, $v);
+            }
+
+            return $v;
+        }, $parts), static function ($v) {
+            return $v !== '';
+        }));
+    }
+
+    /**
+     * Receives a string value and parses it as a csv into an array
+     *
+     * @param   string  $input          The csv string to parse
+     * @param   bool    $firstLineKeys  Set to true if the first line of the csv are keys for all other rows
+     * @param   string  $delimiter      The delimiter between multiple fields
+     * @param   string  $quote          The enclosure or quoting tag
+     *
+     * @return array[]
+     * @throws \Neunerlei\Arrays\ArrayGeneratorException
+     */
+    public static function makeFromCsv(
+        $input,
+        bool $firstLineKeys = false,
+        string $delimiter = ',',
+        string $quote = '"'
+    ): array {
+        if (is_array($input)) {
+            return $input;
+        }
+
+        if (empty($input)) {
+            return [];
+        }
+
+        if (! is_string($input)) {
+            throw new ArrayGeneratorException('The given input is not supported as CSV array source!');
+        }
+
+        $lines     = preg_split('/$\R?^/m', trim($input));
+        $keyLength = 0;
+
+        if ($firstLineKeys) {
+            $keys      = array_shift($lines);
+            $keys      = str_getcsv($keys, $delimiter, $quote);
+            $keys      = array_map('trim', $keys);
+            $keyLength = count($keys);
+        }
+
+        foreach ($lines as $ln => $line) {
+            $line = str_getcsv($line, $delimiter, $quote);
+            $line = array_map('trim', $line);
+
+            // No keys
+            if (! isset($keys)) {
+                $lines[$ln] = $line;
+                continue;
+            }
+
+            // Keys match
+            if (count($line) === $keyLength) {
+                $lines[$ln] = array_combine($keys, $line);
+                continue;
+            }
+
+            // Apply key length to line
+            $lines[$ln] = array_combine($keys, array_pad(array_slice($line, 0, $keyLength), $keyLength, null));
+        }
+
+        return $lines;
+    }
+
+    /**
+     * Creates an array out of a json data string. Throws an exception if an error occurred!
+     * Only works with json objects or arrays. Other values will throw an exception
+     *
+     * @param   string  $input
+     *
+     * @return array
+     * @throws \Neunerlei\Arrays\ArrayGeneratorException
+     */
+    public static function makeFromJson($input): array
+    {
+        if (is_array($input)) {
+            return $input;
+        }
+
+        if (empty($input)) {
+            return [];
+        }
+
+        if (! is_string($input)) {
+            throw new ArrayGeneratorException('The given input is not supported as JSON array source!');
+        }
+
+        $input = trim($input);
+        if ($input[0] !== '{' && $input[0] !== '[') {
+            throw new ArrayGeneratorException('The given input is a string, but has no array as JSON data, so its no supported array source!');
+        }
+
+        try {
+            $data = @json_decode($input, true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $e) {
+            throw new ArrayGeneratorException('Error generating json: ' . $e->getMessage(), $e->getCode(), $e);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Receives a xml-input and converts it into a multidimensional array
+     *
+     * @param   string|array|null|\DOMNode|\SimpleXMLElement  $input
+     * @param   bool                                          $asAssocArray  If this is set to true the result object
+     *                                                                       is
+     *                                                                       converted to a more readable associative
+     *                                                                       array. Be careful with this! There might
+     *                                                                       be
+     *                                                                       sideEffects, like changing paths when the
+     *                                                                       result array has a changing number of
+     *                                                                       nodes.
+     *
+     * @return array
+     * @throws \Neunerlei\Arrays\ArrayGeneratorException
+     */
+    public static function makeFromXml($input, bool $asAssocArray = false): array
+    {
+        if (is_array($input)) {
+            return $input;
+        }
+
         if (empty($input)) {
             return [];
         }
@@ -59,9 +264,11 @@ class ArrayGenerator
             if (stripos(trim($input), '<?xml') !== 0) {
                 $input = '<?xml version="1.0" encoding="UTF-8"?>' . $input;
             }
+
             $savedState = libxml_use_internal_errors(true);
             $input      = simplexml_load_string($input);
             $errors     = libxml_get_errors();
+
             libxml_use_internal_errors($savedState);
             if ($input === false || ! empty($errors)) {
                 throw new ArrayGeneratorException('Failed to parse XML input: ' . reset($errors)->message);
@@ -74,7 +281,7 @@ class ArrayGenerator
         }
         if ($input instanceof SimpleXMLElement) {
             $result = [];
-            $this->xmlObjectToArray($input, $result, '', array_keys(
+            static::xmlObjectToArray($input, $result, '', array_keys(
                 array_merge(['' => ''], $input->getNamespaces(true))
             ));
         }
@@ -90,181 +297,7 @@ class ArrayGenerator
         }
 
         // Convert the array
-        return $this->xmlArrayToAssoc($result);
-    }
-
-    /**
-     * The method receives an object of sorts and converts it into a multidimensional array
-     *
-     * @param $input
-     *
-     * @return array
-     * @throws ArrayGeneratorException
-     */
-    public function fromObject($input): array
-    {
-        if (is_array($input)) {
-            return $input;
-        }
-        if (empty($input)) {
-            return [];
-        }
-        if ($input instanceof DOMNode || $input instanceof SimpleXMLElement) {
-            return $this->fromXml($input);
-        }
-        // Convert iterator and standard class
-        if ($input instanceof Iterator || $input instanceof stdClass) {
-            $out = [];
-            foreach ($input as $k => $v) {
-                $out[$k] = $v;
-            }
-
-            return $out;
-        }
-        if (is_object($input)) {
-            return get_object_vars($input);
-        }
-        throw new ArrayGeneratorException('The given input is not supported as OBJECT array source!');
-    }
-
-    /**
-     * Receives a string list like: "1,asdf,foo, bar" which will be converted into [1, "asdf", "foo", "bar"]
-     * Note the automatic trimming and value conversion of numbers, TRUE, FALSE an null.
-     * By default the separator is ","
-     *
-     * @param   string|array|object  $input      The value to convert into an array
-     * @param   string               $separator  The separator to split the string at
-     *
-     * @return array
-     * @throws ArrayGeneratorException
-     */
-    public function fromStringList($input, string $separator = ','): array
-    {
-        if (is_array($input)) {
-            return $input;
-        }
-        if (empty($input) && $input !== 0) {
-            return [];
-        }
-        if (! is_string($input) && ! is_numeric($input)
-            && ! (is_object($input)
-                  && method_exists($input, '__toString'))) {
-            throw new ArrayGeneratorException('The given input ' . gettype($input)
-                                              . ' is not supported as STRING array source!');
-        }
-        $parts = preg_split('~(?<!\\\)' . preg_quote($separator, '~') . '~', trim((string)$input), -1,
-            PREG_SPLIT_NO_EMPTY);
-
-        return array_values(array_filter(array_map(static function ($v) use ($separator) {
-            $v      = trim($v);
-            $vLower = strtolower($v);
-            if ($vLower === 'null') {
-                return null;
-            }
-            if ($vLower === 'false') {
-                return false;
-            }
-            if ($vLower === 'true') {
-                return true;
-            }
-            if (is_numeric($vLower)) {
-                return strpos($vLower, '.') !== false ? ((float)$v) : ((int)$v);
-            }
-            if (stripos($v, $separator) !== false) {
-                return str_replace('\\' . $separator, $separator, $v);
-            }
-
-            return $v;
-        }, $parts), static function ($v) {
-            return $v !== '';
-        }));
-    }
-
-    /**
-     * Receives a string value and parses it as a csv into an array
-     *
-     * @param   string|array  $input          The csv string to parse
-     * @param   bool          $firstLineKeys  Set to true if the first line of the csv are keys for all other rows
-     * @param   string        $delimiter      The delimiter between multiple fields
-     * @param   string        $quote          The enclosure or quoting tag
-     *
-     * @return array[]
-     * @throws ArrayGeneratorException
-     */
-    public function fromCsv(
-        $input,
-        bool $firstLineKeys = false,
-        string $delimiter = ',',
-        string $quote = '\"'
-    ): array {
-        if (is_array($input)) {
-            return $input;
-        }
-        if (empty($input)) {
-            return [];
-        }
-        if (! is_string($input)) {
-            throw new ArrayGeneratorException('The given input is not supported as CSV array source!');
-        }
-        $lines     = preg_split('/$\R?^/m', trim($input));
-        $keyLength = 0;
-        if ($firstLineKeys) {
-            $keys      = array_shift($lines);
-            $keys      = str_getcsv($keys, $delimiter, $quote);
-            $keys      = array_map('trim', $keys);
-            $keyLength = count($keys);
-        }
-        foreach ($lines as $ln => $line) {
-            $line = str_getcsv($line, $delimiter, $quote);
-            $line = array_map('trim', $line);
-            // No keys
-            if (! isset($keys)) {
-                $lines[$ln] = $line;
-                continue;
-            }
-            // Keys match
-            if (count($line) === $keyLength) {
-                $lines[$ln] = array_combine($keys, $line);
-                continue;
-            }
-            // Apply key length to line
-            $lines[$ln] = array_combine($keys, array_pad(array_slice($line, 0, $keyLength), $keyLength, null));
-        }
-
-        return $lines;
-    }
-
-    /**
-     * Creates an array out of a json data string.
-     * Only works with json objects or arrays. Other values will throw an exception
-     *
-     * @param $input
-     *
-     * @return array
-     * @throws ArrayGeneratorException
-     */
-    public function fromJson($input): array
-    {
-        if (is_array($input)) {
-            return $input;
-        }
-        if (empty($input)) {
-            return [];
-        }
-        if (! is_string($input)) {
-            throw new ArrayGeneratorException('The given input is not supported as JSON array source!');
-        }
-        $input = trim($input);
-        if ($input[0] !== '{' && $input[0] !== '[') {
-            throw new ArrayGeneratorException('The given input is a string, but has no array as JSON data, so its no supported array source!');
-        }
-        try {
-            $data = @json_decode($input, true, 512, JSON_THROW_ON_ERROR);
-        } catch (Throwable $e) {
-            throw new ArrayGeneratorException('Error generating json: ' . $e->getMessage(), $e->getCode(), $e);
-        }
-
-        return $data;
+        return static::xmlArrayToAssoc($result);
     }
 
     /**
@@ -281,7 +314,7 @@ class ArrayGenerator
      * @param   array              $namespaces
      *
      */
-    protected function xmlObjectToArray(
+    protected static function xmlObjectToArray(
         SimpleXMLElement $xml,
         array &$parentData,
         string $ns,
@@ -325,7 +358,7 @@ class ArrayGenerator
      *
      * @return array
      */
-    protected function xmlArrayToAssoc(array $xmlArray): array
+    protected static function xmlArrayToAssoc(array $xmlArray): array
     {
         $assoc = [];
         foreach ($xmlArray as $k => $el) {
@@ -341,7 +374,7 @@ class ArrayGenerator
             }
 
             // Recursively convert the children to an assoc array
-            $assoc[$key] = $this->xmlArrayToAssoc($el);
+            $assoc[$key] = static::xmlArrayToAssoc($el);
         }
 
         // Make sure we make the object as easy to read as possible

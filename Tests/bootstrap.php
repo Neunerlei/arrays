@@ -20,68 +20,68 @@ declare(strict_types=1);
 
 namespace Neunerlei\Arrays\Tests\Assets;
 
-use Neunerlei\Arrays\ArrayPaths;
 use Neunerlei\Arrays\Arrays;
 
-class DummyArraysAdapter extends Arrays {
-	public static function getInstances(): array {
-		return Arrays::$instances;
-	}
-	
-	public static function flushInstances(): void {
-		Arrays::$instances = [];
-	}
-	
-	public static function makeInstance(string $class): object {
-		return Arrays::getInstance($class);
-	}
+class FixtureArraysAdapter extends Arrays
+{
+    public static function clearPathCache(): void
+    {
+        Arrays::$pathCache        = [];
+        Arrays::$pathCacheLimiter = [];
+    }
+
+    public static function getPathCacheData(): array
+    {
+        return [Arrays::$pathCache, Arrays::$pathCacheLimiter];
+    }
+
+    public static function callMethod(string $method, ...$args)
+    {
+        return Arrays::$method(...$args);
+    }
 }
 
-class DummyArrayPathsAdapter extends ArrayPaths {
-	
-	public static function getWalkerStep(array $list, array $path): array {
-		$i = new ArrayPaths();
-		return $i->initWalkerStep($list, $path);
-	}
-	
+class DummyIterator implements \Iterator
+{
+    public $c    = 0;
+    public $list = ["foo" => "bar", "true" => true];
+
+    public function current()
+    {
+        return array_values($this->list)[$this->c];
+    }
+
+    public function next()
+    {
+        $this->c++;
+    }
+
+    public function key()
+    {
+        return array_keys($this->list)[$this->c];
+    }
+
+    public function valid()
+    {
+        return $this->c < count($this->list);
+    }
+
+    public function rewind()
+    {
+        $this->c = 0;
+    }
 }
 
-class DummyDumper {
-
+class DummyClass
+{
+    public $foo = true;
+    public $bar = "baz";
 }
 
-class DummyIterator implements \Iterator {
-	public $c    = 0;
-	public $list = ["foo" => "bar", "true" => TRUE];
-	
-	public function current() {
-		return array_values($this->list)[$this->c];
-	}
-	
-	public function next() {
-		$this->c++;
-	}
-	
-	public function key() {
-		return array_keys($this->list)[$this->c];
-	}
-	
-	public function valid() {
-		return $this->c < count($this->list);
-	}
-	
-	public function rewind() {
-		$this->c = 0;
-	}
-}
-
-class DummyClass {
-	public $foo = TRUE;
-	public $bar = "baz";
-}
-
-class DummyToString {
-	public function __toString() {
-		return "foo,bar,baz";
-	}
+class DummyToString
+{
+    public function __toString()
+    {
+        return "foo,bar,baz";
+    }
 }

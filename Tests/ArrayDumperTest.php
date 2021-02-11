@@ -119,7 +119,7 @@ class ArrayDumperTest extends TestCase
     {
         $a = [1, [2, [3, [4, [5, [6, [7, [8, [9]]]]]]]]];
         static::assertEquals(
-            Arrays::dumpToJson($a, ['options' => JSON_PARTIAL_OUTPUT_ON_ERROR, 'depth' => 2]),
-            '[1,[2,[3,[4,[5,[6,[7,[8,[9]]]]]]]]]');
+            '[1,[2,[3,[4,[5,[6,[7,[8,[9]]]]]]]]]',
+            Arrays::dumpToJson($a, ['options' => JSON_PARTIAL_OUTPUT_ON_ERROR, 'depth' => 2]));
     }
 }

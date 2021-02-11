@@ -20,40 +20,13 @@ declare(strict_types=1);
 
 namespace Neunerlei\Arrays\Tests\Assets;
 
-use Neunerlei\Arrays\ArrayDumper;
 use Neunerlei\Arrays\ArrayException;
-use Neunerlei\Arrays\ArrayGenerator;
-use Neunerlei\Arrays\ArrayPaths;
 use Neunerlei\Arrays\Arrays;
 use PHPUnit\Framework\TestCase;
 
 class ArraysTest extends TestCase
 {
-    public function testInstanceCreation()
-    {
-        self::assertInstanceOf(ArrayDumper::class, DummyArraysAdapter::makeInstance(Arrays::$dumperClass));
-        self::assertInstanceOf(ArrayGenerator::class, DummyArraysAdapter::makeInstance(Arrays::$generatorClass));
-        self::assertInstanceOf(ArrayPaths::class, DummyArraysAdapter::makeInstance(Arrays::$pathClass));
-        self::assertSame(DummyArraysAdapter::makeInstance(Arrays::$pathClass),
-            DummyArraysAdapter::makeInstance(Arrays::$pathClass));
-        self::assertArrayHasKey(Arrays::$pathClass, DummyArraysAdapter::getInstances());
-        self::assertEquals(3, count(DummyArraysAdapter::getInstances()));
-
-        // Check if the update works
-        Arrays::$dumperClass = DummyDumper::class;
-        self::assertInstanceOf(DummyDumper::class, DummyArraysAdapter::makeInstance(Arrays::$dumperClass));
-        self::assertEquals(4, count(DummyArraysAdapter::getInstances()));
-
-        DummyArraysAdapter::flushInstances();
-    }
-
-    public function testInstanceCreationFailure()
-    {
-        $this->expectException(ArrayException::class);
-        DummyArraysAdapter::makeInstance(NonExistentClass::class);
-    }
-
-    public function _testIsAssociativeDataProvider()
+    public function _testIsAssociativeDataProvider(): array
     {
         return [
             [false, []],
@@ -69,12 +42,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testIsAssociativeDataProvider
      */
-    public function testIsAssociative($a, $b)
+    public function testIsAssociative($a, $b): void
     {
         self::assertEquals($a, Arrays::isAssociative($b));
     }
 
-    public function _testIsSequentialDataProvider()
+    public function _testIsSequentialDataProvider(): array
     {
         $list = [123, 234, 345, 'asdf'];
         unset($list[2]);
@@ -94,12 +67,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testIsSequentialDataProvider
      */
-    public function testIsSequential($a, $b)
+    public function testIsSequential($a, $b): void
     {
         self::assertEquals($a, Arrays::isSequential($b));
     }
 
-    public function _testIsArrayListDataProvider()
+    public function _testIsArrayListDataProvider(): array
     {
         return [
             [false, ['asdf' => 1]],
@@ -118,12 +91,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testIsArrayListDataProvider
      */
-    public function testIsArrayList($a, $b)
+    public function testIsArrayList($a, $b): void
     {
         self::assertEquals($a, Arrays::isArrayList($b));
     }
 
-    public function _testSortByStrLenDataProvider()
+    public function _testSortByStrLenDataProvider(): array
     {
         return [
             [['fooFooFoo', 'fooFoo', 'fooFoo', 'bar'], ['bar', 'fooFoo', 'fooFooFoo', 'fooFoo']],
@@ -140,12 +113,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testSortByStrLenDataProvider
      */
-    public function testSortByStrLen($a, $b, $c = false)
+    public function testSortByStrLen($a, $b, $c = false): void
     {
         self::assertEquals($a, Arrays::sortByStrLen($b, $c));
     }
 
-    public function _testSortByKeyStrLenDataProvider()
+    public function _testSortByKeyStrLenDataProvider(): array
     {
         return [
             [['a' => 'a', 'aa' => 'aa', 'aaa' => 'aaa'], ['aaa' => 'aaa', 'a' => 'a', 'aa' => 'aa']],
@@ -164,12 +137,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testSortByKeyStrLenDataProvider
      */
-    public function testSortByKeyStrLen($a, $b, $c = false)
+    public function testSortByKeyStrLen($a, $b, $c = false): void
     {
         self::assertEquals($a, Arrays::sortByKeyStrLen($b, $c));
     }
 
-    public function _testMergeDataProvider()
+    public function _testMergeDataProvider(): array
     {
         return [
             [['foo', 'a', 'b', 'c'], [['foo'], ['a', 'b', 'c']]],
@@ -206,12 +179,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testMergeDataProvider
      */
-    public function testMerge($a, $b)
+    public function testMerge($a, $b): void
     {
         self::assertEquals($a, Arrays::merge(...$b));
     }
 
-    public function _testMergeFailDataProvider()
+    public function _testMergeFailDataProvider(): array
     {
         return [
             [['foo']],
@@ -225,13 +198,13 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testMergeFailDataProvider
      */
-    public function testMergeFail($a)
+    public function testMergeFail($a): void
     {
         $this->expectException(ArrayException::class);
         Arrays::merge(...$a);
     }
 
-    public function _testAttachDataProvider()
+    public function _testAttachDataProvider(): array
     {
         return [
             [['a', 'b', 'c'], [['a'], ['b'], ['c']]],
@@ -247,12 +220,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testAttachDataProvider
      */
-    public function testAttach($a, $b)
+    public function testAttach($a, $b): void
     {
         self::assertEquals($a, Arrays::attach(...$b));
     }
 
-    public function _testAttachFailDataProvider()
+    public function _testAttachFailDataProvider(): array
     {
         return [
             [['foo']],
@@ -267,13 +240,13 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testAttachFailDataProvider
      */
-    public function testAttachFail($a)
+    public function testAttachFail($a): void
     {
         $this->expectException(ArrayException::class);
         Arrays::attach(...$a);
     }
 
-    public function _testRenameKeysDataProvider()
+    public function _testRenameKeysDataProvider(): array
     {
         return [
             [['foo' => 'bar'], ['bar' => 'bar'], ['bar' => 'foo']],
@@ -290,12 +263,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testRenameKeysDataProvider
      */
-    public function testRenameKeys($a, $b, $c)
+    public function testRenameKeys($a, $b, $c): void
     {
         self::assertEquals($a, Arrays::renameKeys($b, $c));
     }
 
-    public function _testInsertAtDataProvider()
+    public function _testInsertAtDataProvider(): array
     {
         return [
             [
@@ -347,12 +320,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testInsertAtDataProvider
      */
-    public function testInsertAt($a, $b)
+    public function testInsertAt($a, $b): void
     {
         self::assertEquals($a, Arrays::insertAt(...$b));
     }
 
-    public function _testShortenDataProvider()
+    public function _testShortenDataProvider(): array
     {
         return [
             [123, ['foo' => [['bar' => 123]]]],
@@ -367,12 +340,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testShortenDataProvider
      */
-    public function testShorten($a, $b)
+    public function testShorten($a, $b): void
     {
         self::assertEquals($a, Arrays::shorten($b));
     }
 
-    public function _testGetSimilarKeyDataProvider()
+    public function _testGetSimilarKeyDataProvider(): array
     {
         return [
             ['foo', ['foo' => true, 'bar' => true, 'baz' => true], 'foo'],
@@ -392,12 +365,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testGetSimilarKeyDataProvider
      */
-    public function testGetSimilarKey($a, $b, $c)
+    public function testGetSimilarKey($a, $b, $c): void
     {
         self::assertEquals($a, Arrays::getSimilarKey($b, $c));
     }
 
-    public function _testSortByDataProvider()
+    public function _testSortByDataProvider(): array
     {
         $data = [
             'asdf' => [
@@ -448,12 +421,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testSortByDataProvider
      */
-    public function testSortBy($a, $b)
+    public function testSortBy($a, $b): void
     {
         self::assertEquals($a, Arrays::sortBy(...$b));
     }
 
-    public function _testWithoutDataProvider()
+    public function _testWithoutDataProvider(): array
     {
         return [
             [
@@ -481,12 +454,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testWithoutDataProvider
      */
-    public function testWithout($a, $b)
+    public function testWithout($a, $b): void
     {
         self::assertEquals($a, Arrays::without(...$b));
     }
 
-    public function _testFlattenDataProvider()
+    public function _testFlattenDataProvider(): array
     {
         return [
             [
@@ -535,12 +508,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testFlattenDataProvider
      */
-    public function testFlatten($a, $b)
+    public function testFlatten($a, $b): void
     {
         self::assertEquals($a, Arrays::flatten(...$b));
     }
 
-    public function _testUnflattenDataProvider()
+    public function _testUnflattenDataProvider(): array
     {
         return [
             [
@@ -564,12 +537,12 @@ class ArraysTest extends TestCase
      *
      * @dataProvider _testUnflattenDataProvider
      */
-    public function testUnflatten($a, $b)
+    public function testUnflatten($a, $b): void
     {
         self::assertEquals($a, Arrays::unflatten(...$b));
     }
 
-    public function testMapRecursive()
+    public function testMapRecursive(): void
     {
         $list = [
             'foo' => 'bar',

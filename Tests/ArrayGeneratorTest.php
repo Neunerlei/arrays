@@ -121,6 +121,8 @@ class ArrayGeneratorTest extends TestCase
 
     /**
      * @dataProvider _testFromXmlFailDataProvider
+     *
+     * @param $v
      */
     public function testFromXmlFail($v): void
     {
@@ -226,7 +228,7 @@ class ArrayGeneratorTest extends TestCase
      *
      * @dataProvider _testFromStringListDataProvider
      */
-    public function testFromStringList($a, $b, $sep = ','): void
+    public function testFromStringList($a, $b, $sep = null): void
     {
         self::assertEquals($a, Arrays::makeFromStringList($b, $sep));
     }
