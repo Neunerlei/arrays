@@ -156,16 +156,15 @@ class Arrays
      * NOTE2: It is possible to remove keys from an array while they are merge by using the __UNSET special value.
      * Keep in mind, that the "allowRemoval" flag has to be enabled for that.
      *
-     * @param   array[]  ...$args  A list of arrays that should be merged with each other
-     *                             The list can contain the following strings to act as FLAGS to modify the behaviour
-     *                             of
-     *                             the method:
-     *                             - strictNumericMerge|sn: By default only arrays with numeric keys are merged into
-     *                             each other. By setting this flag ALL values will be merged into each other when they
-     *                             have numeric keys.
-     *                             - noNumericMerge|nn: Disables the merging of numeric keys. See NOTE above
-     *                             - allowRemoval|r: Enables the value "__UNSET" feature, which can be used in the
-     *                             merged array in order to unset array keys in the original array.
+     * @param   array[]|string  ...$args  A list of arrays that should be merged with each other
+     *                                    The list can contain the following strings to act as FLAGS to modify the
+     *                                    behaviour of the method:
+     *                                    - strictNumericMerge|sn: By default only arrays with numeric keys are merged
+     *                                    into each other. By setting this flag ALL values will be merged into each
+     *                                    other when they have numeric keys.
+     *                                    - noNumericMerge|nn: Disables the merging of numeric keys. See NOTE above
+     *                                    - allowRemoval|r: Enables the value "__UNSET" feature, which can be used in
+     *                                    the merged array in order to unset array keys in the original array.
      *
      * @return array
      * @throws \Neunerlei\Arrays\ArrayException
