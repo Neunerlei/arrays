@@ -31,18 +31,18 @@ class ArraysTest extends TestCase
 {
     public function testInstanceCreation()
     {
-        $this->assertInstanceOf(ArrayDumper::class, DummyArraysAdapter::makeInstance(Arrays::$dumperClass));
-        $this->assertInstanceOf(ArrayGenerator::class, DummyArraysAdapter::makeInstance(Arrays::$generatorClass));
-        $this->assertInstanceOf(ArrayPaths::class, DummyArraysAdapter::makeInstance(Arrays::$pathClass));
-        $this->assertSame(DummyArraysAdapter::makeInstance(Arrays::$pathClass),
+        self::assertInstanceOf(ArrayDumper::class, DummyArraysAdapter::makeInstance(Arrays::$dumperClass));
+        self::assertInstanceOf(ArrayGenerator::class, DummyArraysAdapter::makeInstance(Arrays::$generatorClass));
+        self::assertInstanceOf(ArrayPaths::class, DummyArraysAdapter::makeInstance(Arrays::$pathClass));
+        self::assertSame(DummyArraysAdapter::makeInstance(Arrays::$pathClass),
             DummyArraysAdapter::makeInstance(Arrays::$pathClass));
-        $this->assertArrayHasKey(Arrays::$pathClass, DummyArraysAdapter::getInstances());
-        $this->assertEquals(3, count(DummyArraysAdapter::getInstances()));
+        self::assertArrayHasKey(Arrays::$pathClass, DummyArraysAdapter::getInstances());
+        self::assertEquals(3, count(DummyArraysAdapter::getInstances()));
 
         // Check if the update works
         Arrays::$dumperClass = DummyDumper::class;
-        $this->assertInstanceOf(DummyDumper::class, DummyArraysAdapter::makeInstance(Arrays::$dumperClass));
-        $this->assertEquals(4, count(DummyArraysAdapter::getInstances()));
+        self::assertInstanceOf(DummyDumper::class, DummyArraysAdapter::makeInstance(Arrays::$dumperClass));
+        self::assertEquals(4, count(DummyArraysAdapter::getInstances()));
 
         DummyArraysAdapter::flushInstances();
     }
@@ -71,7 +71,7 @@ class ArraysTest extends TestCase
      */
     public function testIsAssociative($a, $b)
     {
-        $this->assertEquals($a, Arrays::isAssociative($b));
+        self::assertEquals($a, Arrays::isAssociative($b));
     }
 
     public function _testIsSequentialDataProvider()
@@ -96,7 +96,7 @@ class ArraysTest extends TestCase
      */
     public function testIsSequential($a, $b)
     {
-        $this->assertEquals($a, Arrays::isSequential($b));
+        self::assertEquals($a, Arrays::isSequential($b));
     }
 
     public function _testIsArrayListDataProvider()
@@ -120,7 +120,7 @@ class ArraysTest extends TestCase
      */
     public function testIsArrayList($a, $b)
     {
-        $this->assertEquals($a, Arrays::isArrayList($b));
+        self::assertEquals($a, Arrays::isArrayList($b));
     }
 
     public function _testSortByStrLenDataProvider()
@@ -142,7 +142,7 @@ class ArraysTest extends TestCase
      */
     public function testSortByStrLen($a, $b, $c = false)
     {
-        $this->assertEquals($a, Arrays::sortByStrLen($b, $c));
+        self::assertEquals($a, Arrays::sortByStrLen($b, $c));
     }
 
     public function _testSortByKeyStrLenDataProvider()
@@ -166,7 +166,7 @@ class ArraysTest extends TestCase
      */
     public function testSortByKeyStrLen($a, $b, $c = false)
     {
-        $this->assertEquals($a, Arrays::sortByKeyStrLen($b, $c));
+        self::assertEquals($a, Arrays::sortByKeyStrLen($b, $c));
     }
 
     public function _testMergeDataProvider()
@@ -208,7 +208,7 @@ class ArraysTest extends TestCase
      */
     public function testMerge($a, $b)
     {
-        $this->assertEquals($a, Arrays::merge(...$b));
+        self::assertEquals($a, Arrays::merge(...$b));
     }
 
     public function _testMergeFailDataProvider()
@@ -249,7 +249,7 @@ class ArraysTest extends TestCase
      */
     public function testAttach($a, $b)
     {
-        $this->assertEquals($a, Arrays::attach(...$b));
+        self::assertEquals($a, Arrays::attach(...$b));
     }
 
     public function _testAttachFailDataProvider()
@@ -292,7 +292,7 @@ class ArraysTest extends TestCase
      */
     public function testRenameKeys($a, $b, $c)
     {
-        $this->assertEquals($a, Arrays::renameKeys($b, $c));
+        self::assertEquals($a, Arrays::renameKeys($b, $c));
     }
 
     public function _testInsertAtDataProvider()
@@ -349,7 +349,7 @@ class ArraysTest extends TestCase
      */
     public function testInsertAt($a, $b)
     {
-        $this->assertEquals($a, Arrays::insertAt(...$b));
+        self::assertEquals($a, Arrays::insertAt(...$b));
     }
 
     public function _testShortenDataProvider()
@@ -369,7 +369,7 @@ class ArraysTest extends TestCase
      */
     public function testShorten($a, $b)
     {
-        $this->assertEquals($a, Arrays::shorten($b));
+        self::assertEquals($a, Arrays::shorten($b));
     }
 
     public function _testGetSimilarKeyDataProvider()
@@ -394,7 +394,7 @@ class ArraysTest extends TestCase
      */
     public function testGetSimilarKey($a, $b, $c)
     {
-        $this->assertEquals($a, Arrays::getSimilarKey($b, $c));
+        self::assertEquals($a, Arrays::getSimilarKey($b, $c));
     }
 
     public function _testSortByDataProvider()
@@ -450,7 +450,7 @@ class ArraysTest extends TestCase
      */
     public function testSortBy($a, $b)
     {
-        $this->assertEquals($a, Arrays::sortBy(...$b));
+        self::assertEquals($a, Arrays::sortBy(...$b));
     }
 
     public function _testWithoutDataProvider()
@@ -483,7 +483,7 @@ class ArraysTest extends TestCase
      */
     public function testWithout($a, $b)
     {
-        $this->assertEquals($a, Arrays::without(...$b));
+        self::assertEquals($a, Arrays::without(...$b));
     }
 
     public function _testFlattenDataProvider()
@@ -537,7 +537,7 @@ class ArraysTest extends TestCase
      */
     public function testFlatten($a, $b)
     {
-        $this->assertEquals($a, Arrays::flatten(...$b));
+        self::assertEquals($a, Arrays::flatten(...$b));
     }
 
     public function _testUnflattenDataProvider()
@@ -566,7 +566,7 @@ class ArraysTest extends TestCase
      */
     public function testUnflatten($a, $b)
     {
-        $this->assertEquals($a, Arrays::unflatten(...$b));
+        self::assertEquals($a, Arrays::unflatten(...$b));
     }
 
     public function testMapRecursive()
@@ -613,7 +613,7 @@ class ArraysTest extends TestCase
                 ],
             ],
         ];
-        $this->assertEquals($expected, $result);
+        self::assertEquals($expected, $result);
     }
 
 }

@@ -25,11 +25,12 @@ use Neunerlei\Arrays\ArrayGeneratorException;
 use Neunerlei\Arrays\Arrays;
 use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
+use stdClass;
 
 class ArrayGeneratorTest extends TestCase
 {
-    
-    public function _testFromXmlDataProvider()
+
+    public function _testFromXmlDataProvider(): array
     {
         $xml
                      = '<body><node><subNode>Hello</subNode><otherSubNode>123</otherSubNode></node><node><subNode>Hello, from me too!</subNode></node></body>';
@@ -56,7 +57,7 @@ class ArrayGeneratorTest extends TestCase
                 ],
             ],
         ];
-        
+
         return [
             [['foo' => 123], ['foo' => 123]],
             [$xmlExpected, '<?xml version="1.0" encoding="UTF-8"?>' . $xml],
@@ -96,42 +97,42 @@ class ArrayGeneratorTest extends TestCase
             ],
         ];
     }
-    
+
     /**
      * @param $a
      * @param $b
      *
      * @dataProvider _testFromXmlDataProvider
      */
-    public function testFromXml($a, $b)
+    public function testFromXml($a, $b): void
     {
-        $this->assertEquals($a, Arrays::makeFromXml($b));
+        self::assertEquals($a, Arrays::makeFromXml($b));
     }
-    
+
     public function _testFromXmlFailDataProvider(): array
     {
         return [
             ['asdf'],
-            [new \stdClass()],
+            [new stdClass()],
             [123],
             ['<body><tag><tag2></tag>'],
         ];
     }
-    
+
     /**
      * @dataProvider _testFromXmlFailDataProvider
      */
-    public function testFromXmlFail($v)
+    public function testFromXmlFail($v): void
     {
         $this->expectException(ArrayGeneratorException::class);
         Arrays::makeFromXml($v);
     }
-    
-    public function testFromXmlAsAssoc()
+
+    public function testFromXmlAsAssoc(): void
     {
         $xml
             = '<body><node><subNode>Hello</subNode><otherSubNode>123</otherSubNode></node><node><subNode>Hello, from me too!</subNode></node></body>';
-        $this->assertEquals([
+        self::assertEquals([
             'body' => [
                 'node' => [
                     'subNode' => 'Hello, from me too!',
@@ -140,7 +141,7 @@ class ArrayGeneratorTest extends TestCase
         ], Arrays::makeFromXml($xml, true));
         $xml
             = '<body><foo faz="baz"><subNode foo="bar">Hello</subNode><otherSubNode>123</otherSubNode></foo><bar><subNode>Hello, from me too!</subNode></bar></body>';
-        $this->assertEquals([
+        self::assertEquals([
             'body' => [
                 'foo' => [
                     'subNode'      => 'Hello',
@@ -152,8 +153,8 @@ class ArrayGeneratorTest extends TestCase
             ],
         ], Arrays::makeFromXml($xml, true));
     }
-    
-    public function _testFromObjectDataProvider()
+
+    public function _testFromObjectDataProvider(): array
     {
         return [
             [['foo' => true], ['foo' => true]],
@@ -182,25 +183,25 @@ class ArrayGeneratorTest extends TestCase
             [['foo' => true, 'bar' => 'baz'], new DummyClass()],
         ];
     }
-    
+
     /**
      * @param $a
      * @param $b
      *
      * @dataProvider _testFromObjectDataProvider
      */
-    public function testFromObject($a, $b)
+    public function testFromObject($a, $b): void
     {
-        $this->assertEquals($a, Arrays::makeFromObject($b));
+        self::assertEquals($a, Arrays::makeFromObject($b));
     }
-    
-    public function testFromObjectWithNoObject()
+
+    public function testFromObjectWithNoObject(): void
     {
         $this->expectException(ArrayGeneratorException::class);
         Arrays::makeFromObject('asdf');
     }
-    
-    public function _testFromStringListDataProvider()
+
+    public function _testFromStringListDataProvider(): array
     {
         return [
             [[], []],
@@ -217,7 +218,7 @@ class ArrayGeneratorTest extends TestCase
             [['fooTrue', 'fooNull'], 'fooTrue,fooNull'],
         ];
     }
-    
+
     /**
      * @param           $a
      * @param           $b
@@ -225,33 +226,33 @@ class ArrayGeneratorTest extends TestCase
      *
      * @dataProvider _testFromStringListDataProvider
      */
-    public function testFromStringList($a, $b, $sep = ',')
+    public function testFromStringList($a, $b, $sep = ','): void
     {
-        $this->assertEquals($a, Arrays::makeFromStringList($b, $sep));
+        self::assertEquals($a, Arrays::makeFromStringList($b, $sep));
     }
-    
-    
-    public function _testFromStringListFailDataProvider()
+
+
+    public function _testFromStringListFailDataProvider(): array
     {
         return [
-            [new \stdClass()],
+            [new stdClass()],
             [new DummyClass()],
             [new DummyIterator()],
         ];
     }
-    
+
     /**
      * @param $v
      *
      * @dataProvider _testFromStringListFailDataProvider
      */
-    public function testFromStringListFail($v)
+    public function testFromStringListFail($v): void
     {
         $this->expectException(ArrayGeneratorException::class);
         Arrays::makeFromStringList($v);
     }
-    
-    public function _testFromCsvDataProvider()
+
+    public function _testFromCsvDataProvider(): array
     {
         return [
             [[], []],
@@ -269,7 +270,7 @@ class ArrayGeneratorTest extends TestCase
             [[['a', 'b', 'c'], ['d', 'e', 'f']], 'a,b,\'c\'' . PHP_EOL . 'd,\'e\',f', false, ',', '\''],
         ];
     }
-    
+
     /**
      * @param           $a
      * @param           $b
@@ -279,12 +280,12 @@ class ArrayGeneratorTest extends TestCase
      *
      * @dataProvider _testFromCsvDataProvider
      */
-    public function testFromCsv($a, $b, $c = false, $d = ',', $e = '"')
+    public function testFromCsv($a, $b, $c = false, $d = ',', $e = '"'): void
     {
-        $this->assertEquals($a, Arrays::makeFromCsv($b, $c, $d, $e));
+        self::assertEquals($a, Arrays::makeFromCsv($b, $c, $d, $e));
     }
-    
-    public function _testFromCsvFailDataProvider()
+
+    public function _testFromCsvFailDataProvider(): array
     {
         return [
             [123],
@@ -292,19 +293,19 @@ class ArrayGeneratorTest extends TestCase
             [new DummyToString()],
         ];
     }
-    
+
     /**
      * @param $a
      *
      * @dataProvider _testFromCsvFailDataProvider
      */
-    public function testFromCsvFail($a)
+    public function testFromCsvFail($a): void
     {
         $this->expectException(ArrayGeneratorException::class);
         Arrays::makeFromCsv($a);
     }
-    
-    public function _testFromJsonDataProvider()
+
+    public function _testFromJsonDataProvider(): array
     {
         return [
             [[], []],
@@ -314,19 +315,19 @@ class ArrayGeneratorTest extends TestCase
             [['foo' => 'bar', 'bar' => 'baz'], '{"foo":"bar","bar":"baz"}'],
         ];
     }
-    
+
     /**
      * @param $a
      * @param $b
      *
      * @dataProvider _testFromJsonDataProvider
      */
-    public function testFromJson($a, $b)
+    public function testFromJson($a, $b): void
     {
-        $this->assertEquals($a, Arrays::makeFromJson($b));
+        self::assertEquals($a, Arrays::makeFromJson($b));
     }
-    
-    public function _testFromJsonFailDataProvider()
+
+    public function _testFromJsonFailDataProvider(): array
     {
         return [
             ['123'],
@@ -336,13 +337,13 @@ class ArrayGeneratorTest extends TestCase
             ['{\"foo\":bar\"}'],
         ];
     }
-    
+
     /**
      * @param $a
      *
      * @dataProvider _testFromJsonFailDataProvider
      */
-    public function testFromJsonFail($a)
+    public function testFromJsonFail($a): void
     {
         $this->expectException(ArrayGeneratorException::class);
         Arrays::makeFromJson($a);

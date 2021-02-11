@@ -23,13 +23,14 @@ declare(strict_types=1);
 namespace Neunerlei\Arrays\Tests\Assets;
 
 
+use JsonException;
 use Neunerlei\Arrays\Arrays;
 use PHPUnit\Framework\TestCase;
 
 class ArrayDumperTest extends TestCase
 {
 
-    public function _testToJsonDataProvider()
+    public function _testToJsonDataProvider(): array
     {
         return [
             [[], '[]'],
@@ -44,15 +45,15 @@ class ArrayDumperTest extends TestCase
      *
      * @dataProvider _testToJsonDataProvider
      */
-    public function testToJson($a, $b)
+    public function testToJson($a, $b): void
     {
         static::assertEquals(Arrays::dumpToJson($a), $b);
         static::assertEquals(Arrays::dumpToJson($a, ['pretty' => false]), $b);
     }
 
-    public function testToJsonFail()
+    public function testToJsonFail(): void
     {
-        $this->expectException(\JsonException::class);
+        $this->expectException(JsonException::class);
 
         $a   = [123];
         $b   = [&$a];
@@ -61,7 +62,7 @@ class ArrayDumperTest extends TestCase
         Arrays::dumpToJson($a);
     }
 
-    public function _testToJsonPrettyProvider()
+    public function _testToJsonPrettyProvider(): array
     {
         return [
             [[], '[]'],
@@ -89,15 +90,15 @@ class ArrayDumperTest extends TestCase
      *
      * @dataProvider _testToJsonPrettyProvider
      */
-    public function testToJsonPretty($a, $b)
+    public function testToJsonPretty($a, $b): void
     {
         static::assertEquals(Arrays::dumpToJson($a, ['pretty']), $b);
         static::assertEquals(Arrays::dumpToJson($a, ['pretty' => true]), $b);
     }
 
-    public function testToJsonPrettyFail()
+    public function testToJsonPrettyFail(): void
     {
-        $this->expectException(\JsonException::class);
+        $this->expectException(JsonException::class);
 
         $a   = [123];
         $b   = [&$a];
@@ -106,15 +107,15 @@ class ArrayDumperTest extends TestCase
         Arrays::dumpToJson($a, ['pretty']);
     }
 
-    public function testToJsonDepthLimitFail()
+    public function testToJsonDepthLimitFail(): void
     {
-        $this->expectException(\JsonException::class);
+        $this->expectException(JsonException::class);
 
         $a = [1, [2, [3, [4, [5, [6, [7, [8, [9]]]]]]]]];
         Arrays::dumpToJson($a, ['depth' => 2]);
     }
 
-    public function testToJsonOptions()
+    public function testToJsonOptions(): void
     {
         $a = [1, [2, [3, [4, [5, [6, [7, [8, [9]]]]]]]]];
         static::assertEquals(
