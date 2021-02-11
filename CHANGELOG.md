@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/Neunerlei/arrays/compare/v2.0.1...v2.0.2) (2021-02-11)
+
+
+### Bug Fixes
+
+* **merge:** make sure __UNSET values don't get copied into the output by accident ([a3f7bb3](https://github.com/Neunerlei/arrays/commit/a3f7bb3027310063c963b96d3769aed6835c5358))
+
 ### [2.0.1](https://github.com/Neunerlei/arrays/compare/v2.0.0...v2.0.1) (2021-01-30)
 
 
