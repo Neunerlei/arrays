@@ -722,8 +722,7 @@ class Arrays
      *                                         - default (mixed) NULL: The default value if a key was not found in
      *                                         $input.
      *                                         - separator (string) ".": A separator which is used when splitting
-     *                                         string
-     *                                         paths
+     *                                         string paths
      *
      * @return array|null
      *

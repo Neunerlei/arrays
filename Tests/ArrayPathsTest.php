@@ -583,6 +583,11 @@ class ArrayPathsTest extends TestCase
                 ['a' => 'b', 'b' => 'c'],
             ],
             [
+                // This is probably a misconfiguration but should work in this case
+                [[['a' => ['b' => 1]], ['a' => ['b' => 2]], ['a' => ['b' => 3]]], '*.b'],
+                [['a' => 1], ['a' => 2], ['a' => 3]],
+            ],
+            [
                 // This can't work because non array children are simply ignored
                 [['a' => 'b', 'b' => 'c'], ['d']],
                 [],
