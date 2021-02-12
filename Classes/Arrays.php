@@ -20,46 +20,8 @@ declare(strict_types=1);
 
 namespace Neunerlei\Arrays;
 
+use Neunerlei\Arrays\Features\Dumper;
 
-use Neunerlei\Arrays\Traits\BasicTrait;
-use Neunerlei\Arrays\Traits\DumperTrait;
-use Neunerlei\Arrays\Traits\GeneratorTrait;
-use Neunerlei\Arrays\Traits\ListTrait;
-use Neunerlei\Arrays\Traits\PathTrait;
-
-class Arrays
+class Arrays extends Dumper
 {
-    /**
-     * If this value is used in a getList value key, the second part will be used as "alias"
-     */
-    public const GET_LIST_ALIAS_SEPARATOR = ' as ';
-
-    /**
-     * This value is used as a separator for path elements in a string path
-     */
-    public const DEFAULT_PATH_SEPARATOR = '.';
-
-    /**
-     * The list of additional characters that can be escaped when a path is parsed
-     */
-    protected const ESCAPABLE_CHARS
-        = [
-            '*',
-            '[',
-            ']',
-            ',',
-        ];
-
-    /**
-     * The different key types
-     */
-    protected const KEY_TYPE_DEFAULT  = 0;
-    protected const KEY_TYPE_WILDCARD = 1;
-    protected const KEY_TYPE_KEYS     = 2;
-
-    use BasicTrait;
-    use PathTrait;
-    use ListTrait;
-    use GeneratorTrait;
-    use DumperTrait;
 }

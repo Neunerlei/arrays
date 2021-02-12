@@ -20,7 +20,7 @@
 declare(strict_types=1);
 
 
-namespace Neunerlei\Arrays\Traits;
+namespace Neunerlei\Arrays\Features;
 
 
 use DOMNode;
@@ -30,7 +30,7 @@ use SimpleXMLElement;
 use stdClass;
 use Throwable;
 
-trait GeneratorTrait
+abstract class Generator extends Path
 {
 
     /**

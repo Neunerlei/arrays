@@ -20,12 +20,12 @@
 declare(strict_types=1);
 
 
-namespace Neunerlei\Arrays\Traits;
+namespace Neunerlei\Arrays\Features;
 
 
 use Neunerlei\Arrays\ArrayException;
 
-trait BasicTrait
+abstract class Basics
 {
     /**
      * Returns true if the given array is an associative array

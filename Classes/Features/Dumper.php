@@ -20,14 +20,14 @@
 declare(strict_types=1);
 
 
-namespace Neunerlei\Arrays\Traits;
+namespace Neunerlei\Arrays\Features;
 
 
 use DOMDocument;
 use Neunerlei\Arrays\ArrayDumperException;
 use SimpleXMLElement;
 
-trait DumperTrait
+abstract class Dumper extends Lists
 {
     /**
      * Dumps the given array as JSON string.

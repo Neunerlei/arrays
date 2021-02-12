@@ -20,12 +20,16 @@
 declare(strict_types=1);
 
 
-namespace Neunerlei\Arrays\Traits;
+namespace Neunerlei\Arrays\Features;
 
 use TypeError;
 
-trait ListTrait
+abstract class Lists extends Generator
 {
+    /**
+     * If this value is used in a getList value key, the second part will be used as "alias"
+     */
+    public const GET_LIST_ALIAS_SEPARATOR = ' as ';
 
     /**
      * This is a multi purpose tool to handle different scenarios when dealing with array lists.
