@@ -4,6 +4,7 @@
 vendor
 docs/node_modules
 Tests/Coverage
+/.phpunit.result.cache
 
 # IDEA Code Style
 .idea/*
