@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/Neunerlei/arrays/compare/v2.0.2...v3.0.0) (2021-02-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* changes the old instance based architecture to be trait
+based. This removes the instance handling and duplicate method creation.
+However, it may break apps that depend on the instance and class
+replacement feature
+
+### Features
+
+* internal refactoring ([3dd3cff](https://github.com/Neunerlei/arrays/commit/3dd3cff3d2d9e1c27525b03a4190ade4bc385959))
+
+
+### Bug Fixes
+
+* **merge:** fix type hint for args ([1d82775](https://github.com/Neunerlei/arrays/commit/1d82775049e3f7b95566ae1d93b0fbd0c8e44363))
+
 ### [2.0.2](https://github.com/Neunerlei/arrays/compare/v2.0.1...v2.0.2) (2021-02-11)
 
 
