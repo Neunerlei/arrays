@@ -54,8 +54,8 @@ trait PathTrait
     public static function mergePaths($pathA, $pathB, ?string $separatorA = null, ?string $separatorB = null): array
     {
         $separatorB = $separatorB ?? $separatorA;
-        $pathA      = static::parsePath($pathA, $separatorA);
-        $pathB      = static::parsePath($pathB, $separatorB);
+        $pathA      = static::parsePath($pathA, $separatorA, true);
+        $pathB      = static::parsePath($pathB, $separatorB, true);
         foreach ($pathB as $p) {
             $pathA[] = $p;
         }

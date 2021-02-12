@@ -24,6 +24,7 @@ namespace Neunerlei\Arrays\Traits;
 
 
 use InvalidArgumentException;
+use Neunerlei\Arrays\EmptyPathException;
 use TypeError;
 
 trait PathParsingTrait
@@ -36,7 +37,11 @@ trait PathParsingTrait
      */
     protected static $pathCache = [];
 
-    // @todo implement this
+    /**
+     * Used as internal tracker to make sure the $pathCache does not create a memory leak
+     *
+     * @var array
+     */
     protected static $pathCacheLimiter = [];
 
     /**
@@ -48,15 +53,24 @@ trait PathParsingTrait
      * In most circumstances it will make more sense just to escape a separator, tho. Do that by using a backslash like:
      * "my\.array.path" => ["my.array", "path"].
      *
-     * @param   array|string  $path       The path to parse as described above.
-     * @param   string|null   $separator  "." Can be set to any string you want to use as separator of path parts.
+     * @param   array|string  $path        The path to parse as described above.
+     * @param   string|null   $separator   "." Can be set to any string you want to use as separator of path parts.
+     * @param   bool          $allowEmpty  By default empty paths will throw an EmptyPathException. If you want to
+     *                                     silently ignore empty paths set this to true. The method will then return
+     *                                     an empty array
      *
      * @return array
+     * @throws \JsonException
+     * @throws EmptyPathException
      */
-    public static function parsePath($path, ?string $separator = null): array
+    public static function parsePath($path, ?string $separator = null, bool $allowEmpty = false): array
     {
         if (empty($path)) {
-            throw new InvalidArgumentException('The given path is empty!');
+            if ($allowEmpty) {
+                return [];
+            }
+
+            throw new EmptyPathException('The given path is empty!');
         }
 
         if (! is_string($path) && ! is_numeric($path) && ! is_array($path)) {
@@ -150,7 +164,11 @@ trait PathParsingTrait
         }
 
         if (empty($parts)) {
-            throw new InvalidArgumentException('The path parsing resulted in an empty array!');
+            if ($allowEmpty) {
+                return [];
+            }
+
+            throw new EmptyPathException('The path parsing resulted in an empty array!');
         }
 
         static::$pathCache[$cacheKey] = $parts;

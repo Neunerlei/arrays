@@ -21,6 +21,7 @@ namespace Neunerlei\Arrays\Tests;
 
 use InvalidArgumentException;
 use Neunerlei\Arrays\Arrays;
+use Neunerlei\Arrays\EmptyPathException;
 use Neunerlei\Arrays\Tests\Assets\FixtureArraysAdapter;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -59,7 +60,8 @@ class ArrayPathsTest extends TestCase
     /**
      * @param           $a
      * @param           $b
-     * @param   string  $c
+     * @param   null    $c
+     * @param   bool    $d
      *
      * @dataProvider _testParsePathDataProvider
      */
@@ -68,9 +70,39 @@ class ArrayPathsTest extends TestCase
         self::assertEquals($a, Arrays::parsePath($b, $c));
     }
 
+    public function _testParsePathWithEmptyDataDataProvider(): array
+    {
+        return [
+            ['', false],
+            ['', true],
+            [[], false],
+            [[], true],
+            ['.', false],
+            ['.', true],
+        ];
+    }
+
+    /**
+     * @param $path
+     * @param $allowEmpty
+     *
+     * @dataProvider _testParsePathWithEmptyDataDataProvider
+     */
+    public function testParsePathWithEmptyData($path, $allowEmpty): void
+    {
+        if ($allowEmpty) {
+            self::assertEquals([], Arrays::parsePath($path, null, true));
+        } else {
+            $this->expectException(EmptyPathException::class);
+            Arrays::parsePath($path);
+        }
+    }
+
     public function _testParsePathWithInvalidDataDataProvider(): array
     {
         return [
+            [''],
+            [[]],
             ['foo.[bar,baz,foo'],
             ['[[[[[[]]]]]]]]]]]]'],
             ['.'],
