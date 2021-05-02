@@ -170,14 +170,14 @@ abstract class Basics
                 }
             }
             if (! is_array($arg)) {
-                throw new ArrayException('All elements have to be arrays! FormElement $k isn\'t!');
+                throw new ArrayException('All elements have to be arrays! Element ' . $k . ' isn\'t!');
             }
             $argsClean[] = $arg;
         }
         $args = $argsClean;
         unset($argsClean);
         if (count($args) < 2) {
-            throw new ArrayException('At least 2 elements are required to be merged into eachother!');
+            throw new ArrayException('At least 2 elements are required to be merged into each other!');
         }
 
 
