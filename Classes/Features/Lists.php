@@ -100,7 +100,8 @@ abstract class Lists extends Generator
      * @param   array              $input      The input array to gather the list from. Should be a list of arrays.
      * @param   array|string|null  $valueKeys  The list of value keys to extract from the input list
      *                                         as a string, can contain sub-paths like seen in example 4
-     * @param   string|null        $keyKey     Optional key or sub-path which will be used as key in the result array
+     * @param   string|null|bool   $keyKey     Optional key or sub-path which will be used as key in the result array,
+     *                                         Can be set to TRUE to keep the original key
      * @param   array              $options    Additional configuration options:
      *                                         - default (mixed) NULL: The default value if a key was not found in
      *                                         $input.
@@ -112,7 +113,7 @@ abstract class Lists extends Generator
     public static function getList(
         array $input,
         $valueKeys,
-        ?string $keyKey = null,
+        $keyKey = null,
         array $options = []
     ): ?array {
         $valueKeys = $valueKeys ?? [];
@@ -139,7 +140,19 @@ abstract class Lists extends Generator
 
         // Handle Wildcards
         if (empty($valueKeys)) {
+            // @todo this is the behaviour that makes sense, however it breaks some tests
+            // therefore it could break some usages, so we keep the old behaviour until the next major release
+//            if (empty($keyKey)) {
+//                // To simulate the same behaviour we normally have
+//                // we don't return the input array, but the array with a numeric index
+//                return array_values($input);
+//            }
+            // @todo deprecated - remove in next major release
             if (empty($keyKey)) {
+                return $input;
+            }
+
+            if ($keyKey === true) {
                 return $input;
             }
 
@@ -173,17 +186,19 @@ abstract class Lists extends Generator
         $isSingleKeyPerRow = count($map) === 1;
 
         // Check if we need to inject the key key manually
-        if (! empty($keyKey)
-            && ! in_array($keyKey,
-                array_reduce(
-                    $map,
-                    static function ($i, $v) {
-                        return array_merge($i, [$v['key']]);
-                    }, []
-                ), true)
-        ) {
-            $keyKeyWasInjected = true;
-            array_unshift($map, $keyDefinitionGenerator($keyKey));
+        if ($keyKey !== true) {
+            if (! empty($keyKey)
+                && ! in_array($keyKey,
+                    array_reduce(
+                        $map,
+                        static function ($i, $v) {
+                            return array_merge($i, [$v['key']]);
+                        }, []
+                    ), true)
+            ) {
+                $keyKeyWasInjected = true;
+                array_unshift($map, $keyDefinitionGenerator($keyKey));
+            }
         }
 
         // Remove linked lists
@@ -232,14 +247,15 @@ abstract class Lists extends Generator
             }
 
             // Either auto-extend the numeric index or inject the row key we resolved
-            if ($rowKey === null) {
+            if ($keyKey === true) {
+                $result[$initialRowKey] = $rowResult;
+            } elseif ($rowKey === null) {
                 $result[] = $rowResult;
             } else {
                 $result[$rowKey] = $rowResult;
             }
 
             unset($rowResult, $def);
-
         }
         unset($map);
 

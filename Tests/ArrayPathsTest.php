@@ -769,6 +769,46 @@ class ArrayPathsTest extends TestCase
                     ['bar' => 3],
                 ],
             ],
+            // Tests the behaviour if $keyKey is set to true meaning "keep the original key"
+            [
+                [
+                    [
+                        'foo' => [
+                            'bar' => 1,
+                        ],
+                        'baz' => [
+                            'bar' => 2,
+                        ],
+                    ],
+                    ['bar'],
+                    true,
+                ],
+                ['foo' => 1, 'baz' => 2],
+            ],
+            // Tests the behaviour if $keyKey is set to true with an empty $valueKeys array
+            // This results in the input array to be returned
+            [
+                [
+                    [
+                        'foo' => [
+                            'bar' => 1,
+                        ],
+                        'baz' => [
+                            'bar' => 2,
+                        ],
+                    ],
+                    [],
+                    true,
+                ],
+                [
+                    'foo' => [
+                        'bar' => 1,
+                    ],
+                    'baz' => [
+                        'bar' => 2,
+                    ],
+                ],
+            ],
         ];
     }
 
