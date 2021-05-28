@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/Neunerlei/arrays/compare/v3.1.0...v3.2.0) (2021-02-12)
+
+
+### Features
+
+* replace traits with abstract classes and inheritance ([c6718d0](https://github.com/Neunerlei/arrays/commit/c6718d0da05809f80a63e3db7bd505cc12066cf5))
+* update dependencies ([d2a9244](https://github.com/Neunerlei/arrays/commit/d2a924479a1ac2164251bcf1cb52e1feae58df47))
+
 ## [3.1.0](https://github.com/Neunerlei/arrays/compare/v3.0.0...v3.1.0) (2021-02-12)
 
 
