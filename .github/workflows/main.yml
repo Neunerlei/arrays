@@ -1,14 +1,14 @@
 name: Create new Release
 
 on:
-  pull_request:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - 'composer.json'
-      - 'package.json'
-      - 'CHANGELOG.md'
+    pull_request:
+    push:
+        branches:
+            - master
+        paths-ignore:
+            - 'composer.json'
+            - 'package.json'
+            - 'CHANGELOG.md'
 jobs:
     test:
         runs-on: ubuntu-latest
@@ -16,7 +16,7 @@ jobs:
         strategy:
             max-parallel: 2
             matrix:
-                php-versions: [7.3, 7.4]
+                php-versions: [ 7.3, 7.4 ]
 
         name: Test on PHP ${{ matrix.php-versions }}
         steps:
@@ -62,7 +62,7 @@ jobs:
                 uses: actions/checkout@v1
             -
                 name: vuepress-deploy
-                uses: jenkey2011/vuepress-deploy@master
+                uses: jenkey2011/vuepress-deploy@v1.8.1
                 env:
                     CNAME: arrays.neunerlei.eu
                     ACCESS_TOKEN: ${{ secrets.ACTIONS_DEPLOY_TOKEN }}
