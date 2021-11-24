@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.3.1](https://github.com/Neunerlei/arrays/compare/v3.3.0...v3.3.1) (2021-11-24)
+
+
+### Bug Fixes
+
+* **flatten:** ensure that empty arrays at the paths end stay in the list ([fa4ae96](https://github.com/Neunerlei/arrays/commit/fa4ae96081a244af8517b1da7b0c6f30e8d510e1))
+
 ## [3.3.0](https://github.com/Neunerlei/arrays/compare/v3.2.0...v3.3.0) (2021-05-28)
 
 
