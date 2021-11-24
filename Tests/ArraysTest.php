@@ -499,6 +499,15 @@ class ArraysTest extends TestCase
                 ],
                 [['foo' => 123, 'bar' => new DummyIterator()], ['arraysOnly']],
             ],
+            // Empty arrays at the end of a chain must stay there
+            [
+                [
+                    'foo'     => 123,
+                    'bar.baz' => 234,
+                    'baz'     => [],
+                ],
+                [['foo' => 123, 'bar' => ['baz' => 234], 'baz' => []]],
+            ],
         ];
     }
 
@@ -519,6 +528,14 @@ class ArraysTest extends TestCase
             [
                 ['foo' => 123, 'bar' => ['baz' => 234]],
                 [['foo' => 123, 'bar.baz' => 234,]],
+            ],
+            [
+                ['foo' => 123, 'bar' => ['baz' => 234], 'baz' => []],
+                [['foo' => 123, 'bar.baz' => 234, 'baz' => []]],
+            ],
+            [
+                ['foo' => 123, 'bar' => ['baz' => 234], 'baz' => ['bar' => []]],
+                [['foo' => 123, 'bar.baz' => 234, 'baz.bar' => []]],
             ],
             [
                 ['foo' => 123, 'bar' => ['baz' => ['bar' => 234]], 'baz' => ['bar' => ['foo' => true]]],

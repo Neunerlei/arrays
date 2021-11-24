@@ -546,7 +546,7 @@ abstract class Basics
     ): void {
         foreach ($input as $k => $v) {
             $path[] = str_replace($separator, '\\' . $separator, $k);
-            if (($arraysOnly && is_array($v)) || (! $arraysOnly && is_iterable($v))) {
+            if ((($arraysOnly && is_array($v)) || (! $arraysOnly && is_iterable($v))) && ! empty($v)) {
                 static::flattenWalker($out, $v, $path, $separator, $arraysOnly);
             } else {
                 $out[implode($separator, $path)] = $v;
