@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/Neunerlei/arrays/compare/v3.2.0...v3.3.0) (2021-05-28)
+
+
+### Features
+
+* **getList:** allow $keyKey to be TRUE to keep the current list key ([491b838](https://github.com/Neunerlei/arrays/commit/491b838d12cbd1cec3c000c8e8c02b7318dd93b3))
+
+
+### Bug Fixes
+
+* **merge:** fix typos in exception messages ([faa4c70](https://github.com/Neunerlei/arrays/commit/faa4c7084b05905d40bbb746bca1eea5f7b2609c))
+
 ## [3.2.0](https://github.com/Neunerlei/arrays/compare/v3.1.0...v3.2.0) (2021-02-12)
 
 

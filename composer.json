@@ -42,5 +42,5 @@
         "test-cover-clover": "XDEBUG_MODE=coverage phpunit --coverage-clover Tests/Coverage.xml",
         "test-cover": "XDEBUG_MODE=coverage phpunit Tests --coverage-html Tests/Coverage"
     },
-    "version": "3.2.0"
+    "version": "3.3.0"
 }
