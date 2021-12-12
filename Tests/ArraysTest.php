@@ -18,7 +18,7 @@
  */
 declare(strict_types=1);
 
-namespace Neunerlei\Arrays\Tests\Assets;
+namespace Neunerlei\Arrays\Tests;
 
 use Neunerlei\Arrays\ArrayException;
 use Neunerlei\Arrays\Arrays;
@@ -508,6 +508,11 @@ class ArraysTest extends TestCase
                 ],
                 [['foo' => 123, 'bar' => ['baz' => 234], 'baz' => []]],
             ],
+            // Numeric keys must be able to be flattened, too.
+            [
+                ['0.0.foo' => 'bar', '0.1.bar' => 'baz', '1' => 'foo'],
+                [[[['foo' => 'bar'], ['bar' => 'baz']], 'foo']],
+            ],
         ];
     }
 
@@ -544,6 +549,11 @@ class ArraysTest extends TestCase
             [
                 ['foo' => 123, 'bar' => ['baz' => 234]],
                 [['foo' => 123, 'bar-baz' => 234,], ['separator' => '-']],
+            ],
+            // Numeric keys must be de-stringified
+            [
+                [[['foo' => 'bar'], ['bar' => 'baz']], 'foo'],
+                [['0.0.foo' => 'bar', '0.1.bar' => 'baz', '1' => 'foo']],
             ],
         ];
     }
