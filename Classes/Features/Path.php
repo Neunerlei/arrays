@@ -513,7 +513,8 @@ abstract class Path extends Basics
      */
     public static function parsePath($path, ?string $separator = null, bool $allowEmpty = false): array
     {
-        if (empty($path)) {
+        /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+        if (empty($path) && $path !== '0' && $path !== 0) {
             if ($allowEmpty) {
                 return [];
             }
