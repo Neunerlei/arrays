@@ -22,6 +22,7 @@ namespace Neunerlei\Arrays\Tests;
 
 use Neunerlei\Arrays\ArrayException;
 use Neunerlei\Arrays\Arrays;
+use Neunerlei\Arrays\Tests\Assets\DummyIterator;
 use PHPUnit\Framework\TestCase;
 
 class ArraysTest extends TestCase
