@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.3.4](https://github.com/Neunerlei/arrays/compare/v3.3.3...v3.3.4) (2021-12-13)
+
+
+### Bug Fixes
+
+* **flatten:** ensure numeric keys don't throw a TypeError ([5bc0aa3](https://github.com/Neunerlei/arrays/commit/5bc0aa3dfa53e6338c95c838b3dbcc667cdaff3a))
+* **Path:** ensure "0" and 0 are valid paths ([94911d0](https://github.com/Neunerlei/arrays/commit/94911d0e905542ff8014ae78a3dbf24cf0c0c67c))
+
 ### [3.3.3](https://github.com/Neunerlei/arrays/compare/v3.3.2...v3.3.3) (2021-11-24)
 
 ### [3.3.2](https://github.com/Neunerlei/arrays/compare/v3.3.1...v3.3.2) (2021-11-24)
