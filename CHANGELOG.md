@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.5.0](https://github.com/Neunerlei/arrays/compare/v3.4.0...v3.5.0) (2022-02-01)
+
+
+### Features
+
+* **Generator:** extract generator logic into sub classes ([7a97164](https://github.com/Neunerlei/arrays/commit/7a9716490e412e8d7984299796142e630e65874e))
+
 ## [3.4.0](https://github.com/Neunerlei/arrays/compare/v3.3.4...v3.4.0) (2022-02-01)
 
 
