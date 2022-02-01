@@ -50,7 +50,7 @@ abstract class Dumper extends Lists
     {
         $jsonOptions = $options['options'] ?? 0;
         $jsonOptions |= JSON_THROW_ON_ERROR;
-        if ($options['pretty'] ?? false || in_array('pretty', $options, true)) {
+        if (($options['pretty'] ?? false) || in_array('pretty', $options, true)) {
             $jsonOptions |= JSON_PRETTY_PRINT;
         }
 

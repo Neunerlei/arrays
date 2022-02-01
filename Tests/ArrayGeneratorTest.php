@@ -23,6 +23,8 @@ namespace Neunerlei\Arrays\Tests\Assets;
 
 use Neunerlei\Arrays\ArrayGeneratorException;
 use Neunerlei\Arrays\Arrays;
+use Neunerlei\Arrays\Features\Generator\FromObjectGenerator;
+use Neunerlei\Arrays\Features\Generator\FromXmlGenerator;
 use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
 use stdClass;
@@ -197,6 +199,33 @@ class ArrayGeneratorTest extends TestCase
         self::assertEquals($a, Arrays::makeFromObject($b));
     }
 
+    public function testFromObjectWithCustomXmlGenerator(): void
+    {
+        $xmlGenerator = new class extends FromXmlGenerator {
+            public $executed = false;
+
+            public function generate($input, bool $asAssocArray = false): array
+            {
+                $this->executed = true;
+
+                return parent::generate($input, $asAssocArray);
+            }
+        };
+
+        $generator = new FromObjectGenerator();
+        $generator->setXmlGenerator($xmlGenerator);
+
+        $expect = [
+            [
+                'tag'     => 'body',
+                'content' => 'foo!',
+            ],
+        ];
+        $input  = dom_import_simplexml(new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><body>foo!</body>'));
+
+        self::assertEquals($expect, $generator->generate($input));
+    }
+
     public function testFromObjectWithNoObject(): void
     {
         $this->expectException(ArrayGeneratorException::class);
@@ -223,6 +252,7 @@ class ArrayGeneratorTest extends TestCase
                 ['convertTypes' => false],
             ],
             [['foo,bar'], 'foo\\,bar'],
+            [['foo,bar'], 'foo\\,bar', ['convertTypes' => false]],
             [['foo', 'bar', 'baz'], 'foo-bar-baz', '-'],
             [['foo', 'bar', 'baz'], 'foo-bar-baz', ['separator' => '-']],
             [['fooTrue', 'fooNull'], 'fooTrue,fooNull'],

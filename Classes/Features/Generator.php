@@ -23,12 +23,12 @@ declare(strict_types=1);
 namespace Neunerlei\Arrays\Features;
 
 
-use DOMNode;
-use Iterator;
-use Neunerlei\Arrays\ArrayGeneratorException;
+use Neunerlei\Arrays\Features\Generator\FromCsvGenerator;
+use Neunerlei\Arrays\Features\Generator\FromJsonGenerator;
+use Neunerlei\Arrays\Features\Generator\FromObjectGenerator;
+use Neunerlei\Arrays\Features\Generator\FromStringListGenerator;
+use Neunerlei\Arrays\Features\Generator\FromXmlGenerator;
 use SimpleXMLElement;
-use stdClass;
-use Throwable;
 
 abstract class Generator extends Path
 {
@@ -43,34 +43,7 @@ abstract class Generator extends Path
      */
     public static function makeFromObject($input): array
     {
-        if (is_array($input)) {
-            return $input;
-        }
-
-        if (empty($input)) {
-            return [];
-        }
-
-        if ($input instanceof DOMNode || $input instanceof SimpleXMLElement) {
-            return static::makeFromXml($input);
-        }
-
-        if ($input instanceof Iterator || $input instanceof stdClass) {
-            $out = [];
-            foreach ($input as $k => $v) {
-                $out[$k] = $v;
-            }
-
-            return $out;
-        }
-
-        if (is_object($input)) {
-            // @todo in PHP7.4 this will no longer find properties that are not initialized
-            // should we migrate to reflection instead?
-            return get_object_vars($input);
-        }
-
-        throw new ArrayGeneratorException('The given input is not supported as OBJECT array source!');
+        return (new FromObjectGenerator())->generate(...func_get_args());
     }
 
     /**
@@ -97,80 +70,9 @@ abstract class Generator extends Path
         $input,
         $options = null
     ): array {
-        if (is_array($input)) {
-            return $input;
-        }
-
-        if (empty($input) && $input !== 0) {
-            return [];
-        }
-
-        if (! is_string($input) && ! is_numeric($input)
-            && ! (is_object($input) && method_exists($input, '__toString'))
-        ) {
-            throw new ArrayGeneratorException('The given input ' . gettype($input)
-                                              . ' is not supported as STRING array source!');
-        }
-
         $options = is_array($options) ? $options : ['separator' => $options ?? ','];
 
-        $separator      = (string)($options['separator'] ?? ',');
-        $convertTypes   = (bool)($options['convertTypes'] ?? true);
-        $strictNumerics = (
-                              isset($options['strictNumerics'])
-                              && $options['strictNumerics'] === true
-                          )
-                          || in_array('strictNumerics', $options, true);
-
-        $parts = preg_split(
-            '~(?<!\\\)' . preg_quote($separator, '~') . '~',
-            trim((string)$input), -1,
-            PREG_SPLIT_NO_EMPTY
-        );
-
-        if ($convertTypes) {
-            $mapper = static function ($v) use ($separator, $strictNumerics) {
-                $v      = trim($v);
-                $vLower = strtolower($v);
-
-                if ($vLower === 'null') {
-                    return null;
-                }
-
-                if ($vLower === 'false') {
-                    return false;
-                }
-
-                if ($vLower === 'true') {
-                    return true;
-                }
-
-                if (
-                    is_numeric($vLower)
-                    && (
-                        ! $strictNumerics
-                        || preg_match('~^[0-9.]*$~', $vLower)
-                    )
-                ) {
-                    return strpos($vLower, '.') !== false ? ((float)$v) : ((int)$v);
-                }
-
-                if (stripos($v, $separator) !== false) {
-                    return str_replace('\\' . $separator, $separator, $v);
-                }
-
-                return $v;
-            };
-        } else {
-            $mapper = 'trim';
-        }
-
-        return array_values(
-            array_filter(
-                array_map($mapper, $parts),
-                static function ($v) { return $v !== ''; }
-            )
-        );
+        return (new FromStringListGenerator())->generate($input, $options);
     }
 
     /**
@@ -190,49 +92,7 @@ abstract class Generator extends Path
         string $delimiter = ',',
         string $quote = '"'
     ): array {
-        if (is_array($input)) {
-            return $input;
-        }
-
-        if (empty($input)) {
-            return [];
-        }
-
-        if (! is_string($input)) {
-            throw new ArrayGeneratorException('The given input is not supported as CSV array source!');
-        }
-
-        $lines     = preg_split('/$\R?^/m', trim($input));
-        $keyLength = 0;
-
-        if ($firstLineKeys) {
-            $keys      = array_shift($lines);
-            $keys      = str_getcsv($keys, $delimiter, $quote);
-            $keys      = array_map('trim', $keys);
-            $keyLength = count($keys);
-        }
-
-        foreach ($lines as $ln => $line) {
-            $line = str_getcsv($line, $delimiter, $quote);
-            $line = array_map('trim', $line);
-
-            // No keys
-            if (! isset($keys)) {
-                $lines[$ln] = $line;
-                continue;
-            }
-
-            // Keys match
-            if (count($line) === $keyLength) {
-                $lines[$ln] = array_combine($keys, $line);
-                continue;
-            }
-
-            // Apply key length to line
-            $lines[$ln] = array_combine($keys, array_pad(array_slice($line, 0, $keyLength), $keyLength, null));
-        }
-
-        return $lines;
+        return (new FromCsvGenerator())->generate(...func_get_args());
     }
 
     /**
@@ -240,36 +100,19 @@ abstract class Generator extends Path
      * Only works with json objects or arrays. Other values will throw an exception
      *
      * @param   string  $input
+     * @param   array   $options  Additional configuration options for the decoding
+     *                            - assoc bool (TRUE): By default objects are unserialized as associative arrays
+     *                            - options int (0): Bitmask consisting of one or multiple of the JSON_ constants.
+     *                            The behaviour of these constants is described on the JSON constants page.
+     *                            JSON_THROW_ON_ERROR is set by default for all operations
+     *                            - depth int (512): User specified recursion depth.
      *
      * @return array
      * @throws \Neunerlei\Arrays\ArrayGeneratorException
      */
-    public static function makeFromJson($input): array
+    public static function makeFromJson($input, array $options = []): array
     {
-        if (is_array($input)) {
-            return $input;
-        }
-
-        if (empty($input)) {
-            return [];
-        }
-
-        if (! is_string($input)) {
-            throw new ArrayGeneratorException('The given input is not supported as JSON array source!');
-        }
-
-        $input = trim($input);
-        if ($input[0] !== '{' && $input[0] !== '[') {
-            throw new ArrayGeneratorException('The given input is a string, but has no array as JSON data, so its no supported array source!');
-        }
-
-        try {
-            $data = @json_decode($input, true, 512, JSON_THROW_ON_ERROR);
-        } catch (Throwable $e) {
-            throw new ArrayGeneratorException('Error generating json: ' . $e->getMessage(), $e->getCode(), $e);
-        }
-
-        return $data;
+        return (new FromJsonGenerator())->generate(...func_get_args());
     }
 
     /**
@@ -290,60 +133,14 @@ abstract class Generator extends Path
      */
     public static function makeFromXml($input, bool $asAssocArray = false): array
     {
-        if (is_array($input)) {
-            return $input;
-        }
-
-        if (empty($input)) {
-            return [];
-        }
-
-        // Convert xml string to an object
-        if (is_string($input)) {
-            if (stripos(trim($input), '<?xml') !== 0) {
-                $input = '<?xml version="1.0" encoding="UTF-8"?>' . $input;
-            }
-
-            $savedState = libxml_use_internal_errors(true);
-            $input      = simplexml_load_string($input);
-            $errors     = libxml_get_errors();
-
-            libxml_use_internal_errors($savedState);
-            if ($input === false || ! empty($errors)) {
-                throw new ArrayGeneratorException('Failed to parse XML input: ' . reset($errors)->message);
-            }
-        }
-
-        // Convert xml objects into arrays
-        if ($input instanceof DOMNode) {
-            $input = simplexml_import_dom($input);
-        }
-        if ($input instanceof SimpleXMLElement) {
-            $result = [];
-            static::xmlObjectToArray($input, $result, '', array_keys(
-                array_merge(['' => ''], $input->getNamespaces(true))
-            ));
-        }
-
-        // Check if we failed
-        if (! isset($result)) {
-            throw new ArrayGeneratorException('The given input is not supported as XML array source!');
-        }
-
-        // Convert to assoc array if required
-        if (! $asAssocArray) {
-            return $result;
-        }
-
-        // Convert the array
-        return static::xmlArrayToAssoc($result);
+        return (new FromXmlGenerator())->generate(...func_get_args());
     }
 
     /**
      * This method is basically a slightly adjusted clone of cakephp's xml::_toArray method
      * It recursively converts a given xml tree into an associative php array
      *
-     * @see https://github.com/cakephp/utility/blob/master/Xml.php
+     * @see        https://github.com/cakephp/utility/blob/master/Xml.php
      *
      * The array will contain the tag, attributes text content and nodes recursively.
      *
@@ -352,6 +149,8 @@ abstract class Generator extends Path
      * @param   string             $ns
      * @param   array              $namespaces
      *
+     * @deprecated Will be removed in the next major release
+     * @codeCoverageIgnore
      */
     protected static function xmlObjectToArray(
         SimpleXMLElement $xml,
@@ -359,33 +158,7 @@ abstract class Generator extends Path
         string $ns,
         array $namespaces
     ): void {
-        $data = [];
-        foreach ($namespaces as $namespace) {
-            foreach ($xml->attributes($namespace, true) as $key => $value) {
-                if (! empty($namespace)) {
-                    $key = $namespace . ':' . $key;
-                }
-                $data['@' . $key] = (string)$value;
-            }
-            foreach ($xml->children($namespace, true) as $child) {
-                static::xmlObjectToArray($child, $data, $namespace, $namespaces);
-            }
-        }
-        $asString = trim((string)$xml);
-        if (empty($data)) {
-            $data = ['content' => $asString];
-        } elseif ($asString !== '') {
-            $data['content'] = $asString;
-        }
-        if (! empty($ns)) {
-            $ns .= ':';
-        } elseif (! empty($namespaces) && count($xml->getNamespaces()) === 1) {
-            $nsl = $xml->getNamespaces();
-            $ns  = key($nsl) . ':';
-        }
-        $name         = $ns . $xml->getName();
-        $data         = ['tag' => $name] + $data;
-        $parentData[] = $data;
+        (new FromXmlGenerator())->legacyBridge(__FUNCTION__, [$xml, &$parentData, $ns, $namespaces]);
     }
 
     /**
@@ -396,37 +169,12 @@ abstract class Generator extends Path
      * @param   array  $xmlArray  The xml array to convert
      *
      * @return array
+     *
+     * @deprecated Will be removed in the next major release
+     * @codeCoverageIgnore
      */
     protected static function xmlArrayToAssoc(array $xmlArray): array
     {
-        $assoc = [];
-        foreach ($xmlArray as $k => $el) {
-            if (! is_array($el)) {
-                continue;
-            }
-            $key = $el['tag'];
-
-            // Check if there is a static content.
-            if (isset($el['content'])) {
-                $assoc[$key][] = $el['content'];
-                continue;
-            }
-
-            // Recursively convert the children to an assoc array
-            $assoc[$key] = static::xmlArrayToAssoc($el);
-        }
-
-        // Make sure we make the object as easy to read as possible
-        // We will strip out all wrapper arrays that we don't need, when we only have a single child.
-        $assoc = array_map(static function ($el) {
-            if (count($el) === 1 && ! is_array(reset($el)) && is_numeric(key($el))) {
-                return reset($el);
-            }
-
-            return $el;
-        }, $assoc);
-
-        // Done
-        return $assoc;
+        return (new FromXmlGenerator())->legacyBridge(__FUNCTION__, func_get_args());
     }
 }
