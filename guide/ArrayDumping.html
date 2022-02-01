@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Array Dumping | Arrays</title>
+    <meta name="generator" content="VuePress 1.8.2">
+    
+    <meta name="description" content="">
+    
+    <link rel="preload" href="/assets/css/0.styles.e4d8b86b.css" as="style"><link rel="preload" href="/assets/js/app.2b45b039.js" as="script"><link rel="preload" href="/assets/js/2.4ea2d7b7.js" as="script"><link rel="preload" href="/assets/js/8.76aabd39.js" as="script"><link rel="prefetch" href="/assets/js/10.7e387c90.js"><link rel="prefetch" href="/assets/js/11.34af0579.js"><link rel="prefetch" href="/assets/js/3.42158449.js"><link rel="prefetch" href="/assets/js/4.9c0d3927.js"><link rel="prefetch" href="/assets/js/5.8fb2962b.js"><link rel="prefetch" href="/assets/js/6.7a505dc8.js"><link rel="prefetch" href="/assets/js/7.f3a0765d.js"><link rel="prefetch" href="/assets/js/9.5bfc9b02.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.e4d8b86b.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><!----> <span class="site-name">Arrays</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <!----></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><!---->  <ul class="sidebar-links"><li><a href="/" aria-current="page" class="sidebar-link">Arrays - a toolbox</a></li><li><a href="/guide/GeneralHelpers.html" class="sidebar-link">General Helpers</a></li><li><a href="/guide/PathAccess.html" class="sidebar-link">Path Access</a></li><li><a href="/guide/ArrayGeneration.html" class="sidebar-link">Array Generation</a></li><li><a href="/guide/ArrayDumping.html" aria-current="page" class="active sidebar-link">Array Dumping</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/guide/ArrayDumping.html#dumptojson" class="sidebar-link">dumpToJson()</a></li><li class="sidebar-sub-header"><a href="/guide/ArrayDumping.html#dumptoxml" class="sidebar-link">dumpToXml()</a></li></ul></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="array-dumping"><a href="#array-dumping" class="header-anchor">#</a> Array Dumping</h1> <p>The array dumper allows you to serialize an array into different stringified formats.</p> <h2 id="dumptojson"><a href="#dumptojson" class="header-anchor">#</a> dumpToJson()</h2> <p>Dumps the given array as JSON string.
+Simply a wrapper around json_encode to throw errors if the encoding fails.</p> <details class="custom-block details"><summary>Arguments</summary> <ul><li>pretty    If set to TRUE the JSON will be generated pretty printed</li> <li>options   Bitmask consisting of one or multiple of the JSON_ constants. The behaviour of these constants is described on the JSON constants page. JSON_THROW_ON_ERROR is set by default for all operations</li> <li>depth     User specified recursion depth.</li></ul></details> <div class="language-php extra-class"><pre class="language-php"><code><span class="token keyword">use</span> <span class="token package">Neunerlei<span class="token punctuation">\</span>Arrays<span class="token punctuation">\</span>Arrays</span><span class="token punctuation">;</span>
+<span class="token variable">$data</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string single-quoted-string">'foo'</span> <span class="token operator">=&gt;</span> <span class="token string single-quoted-string">'bar'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'bar'</span> <span class="token operator">=&gt;</span> <span class="token string single-quoted-string">'baz'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token class-name static-context">Arrays</span><span class="token operator">::</span><span class="token function">dumpToJson</span><span class="token punctuation">(</span><span class="token variable">$data</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// {&quot;foo&quot;:&quot;bar&quot;,&quot;bar&quot;:&quot;baz&quot;}</span>
+
+<span class="token class-name static-context">Arrays</span><span class="token operator">::</span><span class="token function">dumpToJson</span><span class="token punctuation">(</span><span class="token variable">$data</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string single-quoted-string">'pretty'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// {</span>
+<span class="token comment">//     &quot;foo&quot;: &quot;bar&quot;,</span>
+<span class="token comment">//     &quot;bar&quot;: &quot;baz&quot;</span>
+<span class="token comment">// }</span>
+
+</code></pre></div><h2 id="dumptoxml"><a href="#dumptoxml" class="header-anchor">#</a> dumpToXml()</h2> <p>[WIP] This is the counterpart of Arrays::makeFromXml() which takes it's output
+and converts it back into a stringified XML format.</p> <p>This method works, but is still considered work in progress! Use with care!</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/guide/ArrayGeneration.html" class="prev">
+        Array Generation
+      </a></span> <!----></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.2b45b039.js" defer></script><script src="/assets/js/2.4ea2d7b7.js" defer></script><script src="/assets/js/8.76aabd39.js" defer></script>
+  </body>
+</html>
