@@ -215,9 +215,27 @@ class ArrayGeneratorTest extends TestCase
             [['foo', 'bar', 'baz'], new DummyToString()],
             [['foo', 'bar', 'baz'], 'foo , bar,    baz'],
             [[true, false, true, 1, 0, null, 123], 'true,FALSE,TRUE, 1, , 0,  NULL,, 123  '],
+            [[true, false, true, 1, 0, null, 123], 'true,false,true, 1, , 0,  null,, 123  '],
+            [[true, false, true, 1, 0, null, 123], 'true,false,true, 1, , 0,  null,, 123  ', ['convertTypes' => true]],
+            [
+                ['true', 'FALSE', 'true', '1', '0', 'null', '123'],
+                'true,FALSE,true, 1, , 0,  null,, 123  ',
+                ['convertTypes' => false],
+            ],
             [['foo,bar'], 'foo\\,bar'],
             [['foo', 'bar', 'baz'], 'foo-bar-baz', '-'],
+            [['foo', 'bar', 'baz'], 'foo-bar-baz', ['separator' => '-']],
             [['fooTrue', 'fooNull'], 'fooTrue,fooNull'],
+            [[-123.23], '-123.23'],
+            [[-123.23], '-123.23', ['strictNumerics' => false]],
+            [['-123.23'], '-123.23', ['strictNumerics']],
+            [['-123.23'], '-123.23', ['strictNumerics' => true]],
+            [[-1, 1231281231, '213123-234', 123], '-1,+1231281231,213123-234,123'],
+            [
+                ['-1', '+1231281231', '213123-234', 123, 123.12],
+                '-1,+1231281231,213123-234,123,123.12',
+                ['strictNumerics'],
+            ],
         ];
     }
 
@@ -228,9 +246,9 @@ class ArrayGeneratorTest extends TestCase
      *
      * @dataProvider _testFromStringListDataProvider
      */
-    public function testFromStringList($a, $b, $sep = null): void
+    public function testFromStringList($a, $b, $sep = null, $options = null): void
     {
-        self::assertEquals($a, Arrays::makeFromStringList($b, $sep));
+        self::assertEquals($a, Arrays::makeFromStringList($b, $sep, $options));
     }
 
 

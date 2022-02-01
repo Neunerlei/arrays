@@ -74,17 +74,29 @@ abstract class Generator extends Path
     }
 
     /**
-     * Receives a string list like: "1,asdf,foo, bar" which will be converted into [1, "asdf", "foo", "bar"]
-     * NOTE: the result is automatically trimmed and type converted into: numbers, TRUE, FALSE an null.
+     * Receives a string list like: "1,foo, bar,-12.3" which will be converted into [1, "foo", "bar", -12.3]
+     * NOTE: the result is automatically trimmed and type converted into: numbers, TRUE, FALSE and null.
      *
-     * @param   string       $input      The value to convert into an array
-     * @param   string|null  $separator  The separator to split the string at. By default: ","
+     * @param   string|object|array  $input    The value to convert into an array
+     * @param   array|string         $options  An array of additional options for the conversion.
+     *                                         (LEGACY: a string containing the separator to split the string at)
+     *                                         - separator (string) ",": The separator to split the string at.
+     *                                         - convertTypes (bool) TRUE: values will automatically  be mapped into
+     *                                         their PHP value type (int, float, true, false and null). To disable the
+     *                                         type conversion set this option to FALSE.
+     *                                         - strictNumerics (bool) FALSE: By default, numeric values with prefix
+     *                                         (-/+) will be converted into integers/floats. If this flag is set to
+     *                                         true, only digit values will be converted into integers/floats, those
+     *                                         with prefixes will stay strings.
      *
      * @return array
      * @throws \Neunerlei\Arrays\ArrayGeneratorException
+     * @todo in the next major release "convertTypes" should be "false" by default.
      */
-    public static function makeFromStringList($input, ?string $separator = null): array
-    {
+    public static function makeFromStringList(
+        $input,
+        $options = null
+    ): array {
         if (is_array($input)) {
             return $input;
         }
@@ -100,38 +112,65 @@ abstract class Generator extends Path
                                               . ' is not supported as STRING array source!');
         }
 
-        $separator = $separator ?? ',';
-        $parts     = preg_split('~(?<!\\\)' . preg_quote($separator, '~') . '~', trim((string)$input), -1,
-            PREG_SPLIT_NO_EMPTY);
+        $options = is_array($options) ? $options : ['separator' => $options ?? ','];
 
-        return array_values(array_filter(array_map(static function ($v) use ($separator) {
-            $v      = trim($v);
-            $vLower = strtolower($v);
+        $separator      = (string)($options['separator'] ?? ',');
+        $convertTypes   = (bool)($options['convertTypes'] ?? true);
+        $strictNumerics = (
+                              isset($options['strictNumerics'])
+                              && $options['strictNumerics'] === true
+                          )
+                          || in_array('strictNumerics', $options, true);
 
-            if ($vLower === 'null') {
-                return null;
-            }
+        $parts = preg_split(
+            '~(?<!\\\)' . preg_quote($separator, '~') . '~',
+            trim((string)$input), -1,
+            PREG_SPLIT_NO_EMPTY
+        );
 
-            if ($vLower === 'false') {
-                return false;
-            }
+        if ($convertTypes) {
+            $mapper = static function ($v) use ($separator, $strictNumerics) {
+                $v      = trim($v);
+                $vLower = strtolower($v);
 
-            if ($vLower === 'true') {
-                return true;
-            }
+                if ($vLower === 'null') {
+                    return null;
+                }
 
-            if (is_numeric($vLower)) {
-                return strpos($vLower, '.') !== false ? ((float)$v) : ((int)$v);
-            }
+                if ($vLower === 'false') {
+                    return false;
+                }
 
-            if (stripos($v, $separator) !== false) {
-                return str_replace('\\' . $separator, $separator, $v);
-            }
+                if ($vLower === 'true') {
+                    return true;
+                }
 
-            return $v;
-        }, $parts), static function ($v) {
-            return $v !== '';
-        }));
+                if (
+                    is_numeric($vLower)
+                    && (
+                        ! $strictNumerics
+                        || preg_match('~^[0-9.]*$~', $vLower)
+                    )
+                ) {
+                    return strpos($vLower, '.') !== false ? ((float)$v) : ((int)$v);
+                }
+
+                if (stripos($v, $separator) !== false) {
+                    return str_replace('\\' . $separator, $separator, $v);
+                }
+
+                return $v;
+            };
+        } else {
+            $mapper = 'trim';
+        }
+
+        return array_values(
+            array_filter(
+                array_map($mapper, $parts),
+                static function ($v) { return $v !== ''; }
+            )
+        );
     }
 
     /**
