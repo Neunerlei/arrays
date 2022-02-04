@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2021 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.02.11 at 19:15
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -32,7 +32,7 @@ use SimpleXMLElement;
 
 abstract class Generator extends Path
 {
-
+    
     /**
      * The method receives an object of any kind and converts it into a multidimensional array
      *
@@ -45,7 +45,7 @@ abstract class Generator extends Path
     {
         return (new FromObjectGenerator())->generate(...func_get_args());
     }
-
+    
     /**
      * Receives a string list like: "1,foo, bar,-12.3" which will be converted into [1, "foo", "bar", -12.3]
      * NOTE: the result is automatically trimmed and type converted into: numbers, TRUE, FALSE and null.
@@ -69,12 +69,13 @@ abstract class Generator extends Path
     public static function makeFromStringList(
         $input,
         $options = null
-    ): array {
+    ): array
+    {
         $options = is_array($options) ? $options : ['separator' => $options ?? ','];
-
+        
         return (new FromStringListGenerator())->generate($input, $options);
     }
-
+    
     /**
      * Receives a string value and parses it as a csv into an array
      *
@@ -91,10 +92,11 @@ abstract class Generator extends Path
         bool $firstLineKeys = false,
         string $delimiter = ',',
         string $quote = '"'
-    ): array {
+    ): array
+    {
         return (new FromCsvGenerator())->generate(...func_get_args());
     }
-
+    
     /**
      * Creates an array out of a json data string. Throws an exception if an error occurred!
      * Only works with json objects or arrays. Other values will throw an exception
@@ -114,7 +116,7 @@ abstract class Generator extends Path
     {
         return (new FromJsonGenerator())->generate(...func_get_args());
     }
-
+    
     /**
      * Receives a xml-input and converts it into a multidimensional array
      *
@@ -135,7 +137,7 @@ abstract class Generator extends Path
     {
         return (new FromXmlGenerator())->generate(...func_get_args());
     }
-
+    
     /**
      * This method is basically a slightly adjusted clone of cakephp's xml::_toArray method
      * It recursively converts a given xml tree into an associative php array
@@ -157,10 +159,11 @@ abstract class Generator extends Path
         array &$parentData,
         string $ns,
         array $namespaces
-    ): void {
+    ): void
+    {
         (new FromXmlGenerator())->legacyBridge(__FUNCTION__, [$xml, &$parentData, $ns, $namespaces]);
     }
-
+    
     /**
      * Internal helper that is used to convert an xml result array to a
      * more readable associative array. Be careful with this! There might be sideEffects,

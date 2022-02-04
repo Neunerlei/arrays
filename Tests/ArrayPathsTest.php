@@ -1,6 +1,6 @@
 <?php
-/**
- * Copyright 2020 Martin Neundorfer (Neunerlei)
+/*
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2020.03.02 at 20:54
+ * Last modified: 2022.02.04 at 20:24
  */
 
 namespace Neunerlei\Arrays\Tests;
@@ -29,7 +29,7 @@ use TypeError;
 
 class ArrayPathsTest extends TestCase
 {
-
+    
     public function _testParsePathDataProvider(): array
     {
         return [
@@ -40,23 +40,23 @@ class ArrayPathsTest extends TestCase
             [['foo', 'bar', 'baz'], 'foo.bar.baz.'],
             [['foo', 'bar', 'baz'], 'foo.bar..baz'],
             [['foo', 'bar', 'baz'], 'foo-bar-baz', '-'],
-
+            
             // Test if cached path is resolved correctly
             [['foo', 'bar', 'baz'], 'foo.bar.baz'],
             [['foo', 'bar', 'baz'], 'foo.bar.baz'],
             [['foo', 'bar', 'baz'], 'foo.bar.baz'],
-
+            
             [['foo.bar', 'baz'], 'foo\\.bar.baz'],
             [['foo-bar', 'baz'], 'foo\\-bar-baz', '-'],
             [['[wild,wild2].*.horse.[carrot, orange]'], '\\[wild\\,wild2\\]\\.\\*\\.horse\\.\\[carrot\\, orange\\]'],
             [['foo', ['baz', '[bar]']], 'foo.[baz, \\[bar\\]]'],
-
+            
             [['foo', ['bar', 'baz', 'foo']], 'foo.[bar,baz,foo]'],
             [['foo', ['bar', 'baz', ['foo', 'bar', 'baz']]], 'foo.[bar,baz,foo.bar.baz]'],
             [[['wild', 'wild2'], '*', 'horse', ['carrot', 'orange']], '[wild,wild2].*.horse.[carrot, orange]'],
         ];
     }
-
+    
     /**
      * @param           $a
      * @param           $b
@@ -69,7 +69,7 @@ class ArrayPathsTest extends TestCase
     {
         self::assertEquals($a, Arrays::parsePath($b, $c));
     }
-
+    
     public function _testParsePathWithEmptyDataDataProvider(): array
     {
         return [
@@ -81,7 +81,7 @@ class ArrayPathsTest extends TestCase
             ['.', true],
         ];
     }
-
+    
     /**
      * @param $path
      * @param $allowEmpty
@@ -97,7 +97,7 @@ class ArrayPathsTest extends TestCase
             Arrays::parsePath($path);
         }
     }
-
+    
     public function _testParsePathWithInvalidDataDataProvider(): array
     {
         return [
@@ -109,7 +109,7 @@ class ArrayPathsTest extends TestCase
             ['foo.[bar,baz,foo.bar.baz, sub.[foo'],
         ];
     }
-
+    
     /**
      * @dataProvider _testParsePathWithInvalidDataDataProvider
      *
@@ -120,7 +120,7 @@ class ArrayPathsTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         Arrays::parsePath($v);
     }
-
+    
     public function _testParsePathWithInvalidTypeDataProvider(): array
     {
         return [
@@ -129,7 +129,7 @@ class ArrayPathsTest extends TestCase
             [['string', 'int', 123, [['foo', static function () { }]]]],
         ];
     }
-
+    
     /**
      * @dataProvider _testParsePathWithInvalidTypeDataProvider
      *
@@ -140,13 +140,13 @@ class ArrayPathsTest extends TestCase
         $this->expectException(TypeError::class);
         Arrays::parsePath($v);
     }
-
+    
     public function testPathCacheClearing(): void
     {
         FixtureArraysAdapter::clearPathCache();
-
+        
         self::assertEquals([[], []], FixtureArraysAdapter::getPathCacheData());
-
+        
         $paths = [
             'foo.1',
             'foo.2',
@@ -177,11 +177,11 @@ class ArrayPathsTest extends TestCase
             'foo',
             'bar.baz',
         ];
-
+        
         foreach ($paths as $path) {
             Arrays::parsePath($path);
         }
-
+        
         $expect = [
             [
                 '643abf9958f6c82862a725b2f492e017' => ['foo', '7',],
@@ -228,10 +228,10 @@ class ArrayPathsTest extends TestCase
                 '6ca4b4cb959abe06d25dcd3c79314893',
             ],
         ];
-
+        
         static::assertEquals($expect, FixtureArraysAdapter::getPathCacheData());
     }
-
+    
     public function _testMergePathsDataProvider(): array
     {
         return [
@@ -244,7 +244,7 @@ class ArrayPathsTest extends TestCase
             [['foo', 'bar', 'bar', 'baz'], ['foo', 'bar'], ['bar', 'baz']],
         ];
     }
-
+    
     /**
      * @param           $a
      * @param           $b
@@ -258,7 +258,7 @@ class ArrayPathsTest extends TestCase
     {
         self::assertEquals($a, Arrays::mergePaths($b, $c, $d, $e));
     }
-
+    
     public function provideTestCanUseFastLaneData(): array
     {
         return [
@@ -272,7 +272,7 @@ class ArrayPathsTest extends TestCase
             ['a.b', '_', true],
         ];
     }
-
+    
     /**
      * @param           $path
      * @param   string  $separator
@@ -286,7 +286,7 @@ class ArrayPathsTest extends TestCase
             FixtureArraysAdapter::callMethod('canUseFastLane', $path, $separator)
         );
     }
-
+    
     public function testInitWalkerStep(): void
     {
         self::assertEquals([
@@ -295,14 +295,14 @@ class ArrayPathsTest extends TestCase
             0 // ArrayPaths::KEY_TYPE_DEFAULT,
         ],
             FixtureArraysAdapter::callMethod('initWalkerStep', $this->getTree(), ['rumpel', 'pumpel']));
-
+        
         self::assertEquals([
             ['foo', 'bar', 'baz', 'rumpel', 'wild', 'wild2'],
             false,
             1 // ArrayPaths::KEY_TYPE_WILDCARD,
         ],
             FixtureArraysAdapter::callMethod('initWalkerStep', $this->getTree(), ['*', 'pumpel']));
-
+        
         self::assertEquals([
             ['baz', ['rumpel', 'grumpel'], ['rumpel', 'foo']],
             false,
@@ -311,7 +311,7 @@ class ArrayPathsTest extends TestCase
             FixtureArraysAdapter::callMethod('initWalkerStep', $this->getTree(),
                 [['baz', ['rumpel', 'grumpel'], ['rumpel', 'foo']], 'pumpel']));
     }
-
+    
     /**
      * HAS PATH
      */
@@ -325,7 +325,7 @@ class ArrayPathsTest extends TestCase
         self::assertTrue(Arrays::hasPath($this->getTree(), ['rumpel', 'pumpel', 'foo']));
         self::assertFalse(Arrays::hasPath($this->getTree(), ['rumpel', 'pumpel', 'foo3']));
     }
-
+    
     public function testHasWildcardPath(): void
     {
         self::assertTrue(Arrays::hasPath($this->getTree(), 'wild.*.foo'));
@@ -334,7 +334,7 @@ class ArrayPathsTest extends TestCase
         self::assertTrue(Arrays::hasPath($this->getTree(), 'wild.*.horse.carrot'));
         self::assertTrue(Arrays::hasPath($this->getTree(), ['wild', '*', 'horse', 'carrot']));
     }
-
+    
     public function testHasPathWithSubKeys(): void
     {
         self::assertTrue(Arrays::hasPath($this->getTree(), '[foo,bar]'));
@@ -345,16 +345,16 @@ class ArrayPathsTest extends TestCase
         self::assertTrue(Arrays::hasPath($this->getTree(), 'wild.*.horse.[carrot,saddle]'));
         self::assertFalse(Arrays::hasPath($this->getTree(), 'wild.*.horse.[carrot,saddle,rose]'));
         self::assertTrue(Arrays::hasPath($this->getTree(), '[wild,wild2].*.foo'));
-
+        
         self::assertFalse(Arrays::hasPath([], 'wild.*.horse.[carrot,saddle,rose]'));
     }
-
+    
     public function testHasFail(): void
     {
         $this->expectException(InvalidArgumentException::class);
         Arrays::hasPath(['asdf' => 'foo'], null);
     }
-
+    
     /**
      * GET PATH
      */
@@ -368,7 +368,7 @@ class ArrayPathsTest extends TestCase
         self::assertNull(Arrays::getPath($this->getTree(), ['rumpel', 'pumpel', 'foo3']));
         self::assertNull(Arrays::getPath(['a' => ['b' => []]], 'a.b.c.d'));
     }
-
+    
     public function testGetWildcardPath(): void
     {
         self::assertEquals([123, 234], Arrays::getPath($this->getTree(), 'wild.*.foo'));
@@ -379,17 +379,17 @@ class ArrayPathsTest extends TestCase
         self::assertEquals([
             [
                 'carrot' => 123,
-                'stick'  => 234,
+                'stick' => 234,
                 'saddle' => 345,
             ],
             [
                 'carrot' => 562,
-                'stick'  => 678,
+                'stick' => 678,
                 'saddle' => 903,
             ],
         ], Arrays::getPath($this->getTree(), 'wild.*.horse.*'));
     }
-
+    
     public function testGetWithSubKeys(): void
     {
         self::assertNull(Arrays::getPath([], 'foo'));
@@ -398,11 +398,11 @@ class ArrayPathsTest extends TestCase
         self::assertEquals(
             ['bar' => 123, 'foo' => 'bar', 'foz' => null],
             Arrays::getPath($this->getTree(), [['foo', 'bar', 'foz']]));
-
+        
         // Those should all lead to the same result
         $r = [
             'grumpel' => 555,
-            'pumpel'  => [
+            'pumpel' => [
                 'foo' => 'pumpFoo',
                 'bar' => 'pumpBar',
             ],
@@ -411,37 +411,37 @@ class ArrayPathsTest extends TestCase
         self::assertEquals($r, Arrays::getPath($this->getTree(), 'rumpel.[grumpel,pumpel.foo,pumpel.bar]'));
         self::assertEquals($r, Arrays::getPath($this->getTree(), 'rumpel.[grumpel,pumpel.*]'));
         self::assertEquals($r, Arrays::getPath($this->getTree(), 'rumpel.[grumpel,pumpel.[foo,bar]]'));
-
+        
         self::assertEquals(
             ['grumpel' => 555, 'pumpel' => ['foo' => 'pumpFoo']],
             Arrays::getPath($this->getTree(), ['rumpel', [['pumpel', 'foo'], 'grumpel']]));
-
+        
         self::assertEquals(
             [
                 ['carrot' => 123, 'saddle' => 345],
                 ['carrot' => 562, 'saddle' => 903],
             ],
             Arrays::getPath($this->getTree(), 'wild.*.horse.[carrot,saddle]'));
-
+        
         self::assertEquals(
             [
                 ['carrot' => 123, 'rose' => null, 'saddle' => 345],
                 ['carrot' => 562, 'rose' => null, 'saddle' => 903],
             ],
             Arrays::getPath($this->getTree(), 'wild.*.horse.[carrot,rose,saddle]'));
-
+        
         self::assertEquals([
-            'wild'  => [123, 234],
+            'wild' => [123, 234],
             'wild2' => ['asdf', 'bar', 'baz'],
         ], Arrays::getPath($this->getTree(), '[wild,wild2].*.foo'));
     }
-
+    
     public function testGetFail(): void
     {
         $this->expectException(InvalidArgumentException::class);
         Arrays::getPath(['asdf' => 'foo'], null);
     }
-
+    
     /**
      * SET PATH
      */
@@ -449,8 +449,8 @@ class ArrayPathsTest extends TestCase
     {
         self::assertEquals(['foo' => 'bar'], Arrays::setPath([], 'foo', 'bar'));
         self::assertEquals(['foo' => 'bar', 'bar' => 'baz'], Arrays::setPath(['bar' => 'baz'], 'foo', 'bar'));
-
-        $r                      = [
+        
+        $r = [
             'foo' => [
                 'bar' => 'baz',
                 'baz' => [
@@ -458,15 +458,15 @@ class ArrayPathsTest extends TestCase
                 ],
             ],
         ];
-        $e                      = $r;
+        $e = $r;
         $e['foo']['baz']['foo'] = true;
         self::assertEquals($e, Arrays::setPath($r, 'foo.baz.foo', true));
         self::assertEquals($e, Arrays::setPath($r, ['foo', 'baz', 'foo'], true));
     }
-
+    
     public function testSetWildcardPath(): void
     {
-        $r           = [
+        $r = [
             [
                 'foo' => 123,
             ],
@@ -474,13 +474,13 @@ class ArrayPathsTest extends TestCase
                 'foo' => 123,
             ],
         ];
-        $e           = $r;
+        $e = $r;
         $e[0]['bar'] = true;
         $e[1]['bar'] = true;
         self::assertEquals($e, Arrays::setPath($r, '*.bar', true));
         self::assertEquals($e, Arrays::setPath($r, ['*', 'bar'], true));
-
-        $r                         = [
+        
+        $r = [
             'key' => true,
             'sub' => [
                 [
@@ -493,13 +493,13 @@ class ArrayPathsTest extends TestCase
                 ],
             ],
         ];
-        $e                         = $r;
+        $e = $r;
         $e['sub'][0]['bar']['key'] = 123;
         $e['sub'][1]['bar']['key'] = 123;
         self::assertEquals($e, Arrays::setPath($r, 'sub.*.bar.key', 123));
         self::assertEquals($e, Arrays::setPath($r, ['sub', '*', 'bar', 'key'], 123));
-
-        $r    = [
+        
+        $r = [
             [
                 'foo' => 123,
             ],
@@ -507,38 +507,38 @@ class ArrayPathsTest extends TestCase
                 'foo' => 123,
             ],
         ];
-        $e    = $r;
+        $e = $r;
         $e[0] = false;
         $e[1] = false;
         self::assertEquals($e, Arrays::setPath($r, '*', false));
         self::assertEquals($e, Arrays::setPath($r, ['*'], false));
     }
-
+    
     public function testSetPathWithSubKeys(): void
     {
-        $r                               = $this->getTree();
-        $e                               = $r;
+        $r = $this->getTree();
+        $e = $r;
         $e['wild'][0]['horse']['carrot'] = 'foo';
         $e['wild'][0]['horse']['saddle'] = 'foo';
-        $e['wild'][0]['horse']['free']   = 'foo';
+        $e['wild'][0]['horse']['free'] = 'foo';
         $e['wild'][1]['horse']['carrot'] = 'foo';
         $e['wild'][1]['horse']['saddle'] = 'foo';
-        $e['wild'][1]['horse']['free']   = 'foo';
+        $e['wild'][1]['horse']['free'] = 'foo';
         self::assertEquals($e, Arrays::setPath($r, 'wild.*.horse.[carrot,saddle,free]', 'foo'));
         self::assertEquals($e, Arrays::setPath($r, ['wild', '*', 'horse', ['carrot', 'saddle', 'free']], 'foo'));
-
-        $r                            = $this->getTree();
-        $e                            = $r;
-        $e['baz']['pumpel']['bar']    = 123;
+        
+        $r = $this->getTree();
+        $e = $r;
+        $e['baz']['pumpel']['bar'] = 123;
         $e['rumpel']['pumpel']['bar'] = 123;
         self::assertEquals($e, Arrays::setPath($r, '[baz,rumpel].pumpel.bar', 123));
-
-        $r                                = $this->getTree();
-        $e                                = $r;
-        $e['wild'][0]['horse']['carrot']  = 'orange';
-        $e['wild'][1]['horse']['carrot']  = 'orange';
-        $e['wild'][0]['horse']['orange']  = 'orange';
-        $e['wild'][1]['horse']['orange']  = 'orange';
+        
+        $r = $this->getTree();
+        $e = $r;
+        $e['wild'][0]['horse']['carrot'] = 'orange';
+        $e['wild'][1]['horse']['carrot'] = 'orange';
+        $e['wild'][0]['horse']['orange'] = 'orange';
+        $e['wild'][1]['horse']['orange'] = 'orange';
         $e['wild2'][0]['horse']['carrot'] = 'orange';
         $e['wild2'][0]['horse']['orange'] = 'orange';
         $e['wild2'][1]['horse']['carrot'] = 'orange';
@@ -546,21 +546,21 @@ class ArrayPathsTest extends TestCase
         $e['wild2'][2]['horse']['carrot'] = 'orange';
         $e['wild2'][2]['horse']['orange'] = 'orange';
         self::assertEquals($e, Arrays::setPath($r, '[wild,wild2].*.horse.[carrot, orange]', 'orange'));
-
-        $r                             = $this->getTree();
-        $e                             = $r;
+        
+        $r = $this->getTree();
+        $e = $r;
         $e['baz']['foo']['bar']['baz'] = true;
         $e['baz']['foo']['bar']['bar'] = true;
         self::assertEquals($e, Arrays::setPath($r, 'baz.foo.[bar.baz, bar.bar]', true));
     }
-
-
+    
+    
     public function testSetFail(): void
     {
         $this->expectException(InvalidArgumentException::class);
         Arrays::setPath([], null, true);
     }
-
+    
     /**
      * REMOVE PATH
      */
@@ -570,44 +570,44 @@ class ArrayPathsTest extends TestCase
         self::assertEquals([], Arrays::removePath(['foo' => ['bar' => 'baz']], 'foo'));
         self::assertEquals([], Arrays::removePath(['foo' => ['bar' => 'baz']], 'foo.bar'));
         self::assertEquals(['foo' => []], Arrays::removePath(['foo' => ['bar' => 'baz']], 'foo.bar', ['keepEmpty']));
-
+        
         $r = $this->getTree();
         $e = $r;
         unset($e['baz'][2][1]);
         self::assertEquals($e, Arrays::removePath($r, 'baz.2.1'));
     }
-
+    
     public function testRemoveWildcardPath(): void
     {
         self::assertEquals([], Arrays::removePath(['foo' => 'bar'], '*'));
         self::assertEquals([], Arrays::removePath($this->getTree(), '*'));
-
+        
         $r = $this->getTree();
         $e = $r;
         unset($e['baz'][2][0]);
         self::assertEquals($e, Arrays::removePath($r, '*.*.0'));
-
+        
         $r = $this->getTree();
         $e = $r;
         unset($e['wild2'], $e['wild'][0]['foo'], $e['wild'][1]['foo']);
         self::assertEquals($e, Arrays::removePath($r, '[wild,wild2].*.foo'));
-
+        
         unset($e['rumpel']['pumpel']['foo']);
         self::assertEquals($e, Arrays::removePath($r, '*.*.foo'));
     }
-
+    
     public function testRemoveWithSubKeys(): void
     {
         $r = $this->getTree();
         $e = $r;
         unset($e['foo'], $e['baz'][2]);
         self::assertEquals($e, Arrays::removePath($r, '[foo,baz.2]'));
-
+        
         $r = $this->getTree();
         $e = $r;
         unset($e['foo'], $e['baz']);
         self::assertEquals($e, Arrays::removePath($r, '[foo,baz.1,baz.2,baz.0]'));
-
+        
         $r = $this->getTree();
         $e = $r;
         unset($e['rumpel']['pumpel']);
@@ -615,13 +615,13 @@ class ArrayPathsTest extends TestCase
         self::assertEquals($e, Arrays::removePath($r, 'rumpel.pumpel.*'));
         self::assertEquals($e, Arrays::removePath($r, 'rumpel.pumpel'));
     }
-
+    
     public function testRemoveFail(): void
     {
         $this->expectException(InvalidArgumentException::class);
         Arrays::removePath([], null);
     }
-
+    
     /**
      * FILTER PATH
      */
@@ -630,9 +630,9 @@ class ArrayPathsTest extends TestCase
         Arrays::filterPath([], '*.foo', static function () {
             self::fail('An empty array should never call the filter callback');
         });
-
-        $list         = $this->getTree();
-        $r            = Arrays::filterPath($this->getTree(), 'wild.*',
+        
+        $list = $this->getTree();
+        $r = Arrays::filterPath($this->getTree(), 'wild.*',
             static function ($v, $key, $path, $initialList) use ($list) {
                 if ($path !== ['wild', 0] && $path !== ['wild', 1]) {
                     self::fail('Filter path was not as expected!');
@@ -640,34 +640,34 @@ class ArrayPathsTest extends TestCase
                 self::assertEquals($list, $initialList);
                 self::assertIsArray($v);
                 self::assertArrayHasKey('foo', $v);
-
+                
                 return 'asdf';
             });
-        $e            = $this->getTree();
+        $e = $this->getTree();
         $e['wild'][0] = 'asdf';
         $e['wild'][1] = 'asdf';
         self::assertEquals($e, $r);
-
-        $r                            = Arrays::filterPath($this->getTree(), 'rumpel.[pumpel.foo,grumpel]',
+        
+        $r = Arrays::filterPath($this->getTree(), 'rumpel.[pumpel.foo,grumpel]',
             static function ($v) {
                 if ($v !== 555 && $v !== 'pumpFoo') {
                     self::fail('Filter value was not as expected!');
                 }
-
+                
                 return true;
             });
-        $e                            = $this->getTree();
+        $e = $this->getTree();
         $e['rumpel']['pumpel']['foo'] = true;
-        $e['rumpel']['grumpel']       = true;
+        $e['rumpel']['grumpel'] = true;
         self::assertEquals($e, $r);
     }
-
+    
     public function testFilterFail(): void
     {
         $this->expectException(InvalidArgumentException::class);
         Arrays::filterPath([], null, static function () { });
     }
-
+    
     /**
      * GET LIST
      */
@@ -676,7 +676,7 @@ class ArrayPathsTest extends TestCase
         // Example 1: Return a list of all "id" values
         self::assertEquals(['234', '123'], Arrays::getList($this->getList(), 'id'));
         self::assertEquals(['234', '123'], Arrays::getList($this->getList(), ['id']));
-
+        
         // Example 2: Return a list of all "id" and "title" values
         self::assertEquals(
             [
@@ -684,40 +684,40 @@ class ArrayPathsTest extends TestCase
                 ['id' => '123', 'title' => 'apple'],
             ],
             Arrays::getList($this->getList(), ['id', 'title']));
-
+        
         // Example 3: Return a list of all "title" values with their "id" as key
         self::assertEquals(['234' => 'medium', '123' => 'apple'], Arrays::getList($this->getList(), 'title', 'id'));
-
+        
         // Example 4: Path lookup and aliases for longer keys
         self::assertEquals(
             [
                 '234' => ['array.id' => '12', 'myAlias' => 'di'],
                 '123' => ['array.id' => '23', 'myAlias' => 'pumpel'],
             ], Arrays::getList($this->getList(), ['array.id', 'array.rumpel as myAlias'], 'id'));
-
+        
         // Example 5: Path lookup and default value for unknown keys
         self::assertEquals(
             [
                 '234' => ['array.id' => '12', 'array.bar' => 'baz'],
                 '123' => ['array.id' => '23', 'array.bar' => null],
             ], Arrays::getList($this->getList(), ['array.id', 'array.bar'], 'id'));
-
+        
         self::assertEquals(
             [
                 '234' => ['array.id' => '12', 'array.bar' => 'baz', 'baz' => true, 'baz2' => true],
                 '123' => ['array.id' => '23', 'array.bar' => true, 'baz' => true, 'baz2' => true],
             ], Arrays::getList($this->getList(), ['array.id', 'array.bar', 'baz', 'array.baz as baz2'], 'id',
             ['default' => true]));
-
+        
         // Example 6: Keep the rows identical but use a column value as key in the result array
         $r = ['234' => $this->getList()[0], '123' => $this->getList()[1]];
         self::assertEquals($r, Arrays::getList($this->getList(), null, 'id'));
-
+        
         // Example 7: Dealing with path based key lookups
         $r = ['12' => '234', '23' => '123'];
         self::assertEquals($r, Arrays::getList($this->getList(), 'id', 'array.id'));
     }
-
+    
     public function provideTestGetListEdgeCasesData(): array
     {
         return [
@@ -811,7 +811,7 @@ class ArrayPathsTest extends TestCase
             ],
         ];
     }
-
+    
     /**
      * @param   array       $args
      * @param   array|null  $expect
@@ -822,45 +822,45 @@ class ArrayPathsTest extends TestCase
     {
         self::assertEquals($expect, Arrays::getList(...$args));
     }
-
+    
     public function testGetListInvalidValueKeys(): void
     {
         $this->expectException(TypeError::class);
         Arrays::getList([[]], new stdClass());
     }
-
+    
     protected function getList(): array
     {
         return [
             [
-                'id'    => '234',
+                'id' => '234',
                 'title' => 'medium',
-                'asdf'  => 'asdf',
+                'asdf' => 'asdf',
                 'array' => [
-                    'id'     => '12',
+                    'id' => '12',
                     'rumpel' => 'di',
-                    'bar'    => 'baz',
+                    'bar' => 'baz',
                 ],
             ],
             [
-                'id'    => '123',
+                'id' => '123',
                 'title' => 'apple',
-                'asdf'  => 'asdf',
+                'asdf' => 'asdf',
                 'array' => [
-                    'id'     => '23',
+                    'id' => '23',
                     'rumpel' => 'pumpel',
-                    'foo'    => 'bar',
+                    'foo' => 'bar',
                 ],
             ],
         ];
     }
-
+    
     protected function getTree(): array
     {
         return [
-            'foo'    => 'bar',
-            'bar'    => 123,
-            'baz'    => [
+            'foo' => 'bar',
+            'bar' => 123,
+            'baz' => [
                 123,
                 234,
                 [
@@ -869,32 +869,32 @@ class ArrayPathsTest extends TestCase
                 ],
             ],
             'rumpel' => [
-                'pumpel'  => [
+                'pumpel' => [
                     'foo' => 'pumpFoo',
                     'bar' => 'pumpBar',
                 ],
                 'grumpel' => 555,
-                'foo'     => 222,
+                'foo' => 222,
             ],
-            'wild'   => [
+            'wild' => [
                 [
-                    'foo'   => 123,
+                    'foo' => 123,
                     'horse' => [
                         'carrot' => 123,
-                        'stick'  => 234,
+                        'stick' => 234,
                         'saddle' => 345,
                     ],
                 ],
                 [
-                    'foo'   => 234,
+                    'foo' => 234,
                     'horse' => [
                         'carrot' => 562,
-                        'stick'  => 678,
+                        'stick' => 678,
                         'saddle' => 903,
                     ],
                 ],
             ],
-            'wild2'  => [
+            'wild2' => [
                 ['foo' => 'asdf'],
                 ['foo' => 'bar'],
                 ['foo' => 'baz'],

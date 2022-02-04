@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2022 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2022.02.01 at 14:50
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -33,23 +33,23 @@ class FromJsonGenerator
         if (is_array($input)) {
             return $input;
         }
-
+        
         if (empty($input)) {
             return [];
         }
-
+        
         if (! is_string($input)) {
             throw new ArrayGeneratorException('The given input is not supported as JSON array source!');
         }
-
+        
         $input = trim($input);
         if ($input[0] !== '{' && $input[0] !== '[') {
             throw new ArrayGeneratorException('The given input is a string, but has no array as JSON data, so its no supported array source!');
         }
-
+        
         $jsonOptions = $options['options'] ?? 0;
         $jsonOptions |= JSON_THROW_ON_ERROR;
-
+        
         try {
             /** @noinspection JsonEncodingApiUsageInspection */
             $data = @json_decode(
@@ -61,7 +61,7 @@ class FromJsonGenerator
         } catch (Throwable $e) {
             throw new ArrayGeneratorException('Error generating json: ' . $e->getMessage(), $e->getCode(), $e);
         }
-
+        
         return $data;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2021 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.02.11 at 18:33
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -42,10 +42,10 @@ abstract class Basics
                 return true;
             }
         }
-
+        
         return false;
     }
-
+    
     /**
      * Returns true if the given array is sequential.
      * Sequential arrays are numeric and in order like 0 => 1, 1 => 2, 2 => 3.
@@ -58,7 +58,7 @@ abstract class Basics
     {
         return array_keys($list) === range(0, count($list) - 1);
     }
-
+    
     /**
      * Returns true if the given array is a numeric list of arrays.
      * Meaning:
@@ -74,7 +74,7 @@ abstract class Basics
     {
         return count(array_filter($list, static function ($v) { return is_array($v); })) === count($list);
     }
-
+    
     /**
      * Sorts the given list of strings by the length of the contained values
      *
@@ -91,10 +91,10 @@ abstract class Basics
         if ($asc) {
             $list = array_reverse($list, true);
         }
-
+        
         return static::isAssociative($list) ? $list : array_values($list);
     }
-
+    
     /**
      * Sorts the given list by the length of the key's strings
      * Similar to sortByStrLen() but sorts by key instead of the value
@@ -112,10 +112,10 @@ abstract class Basics
         if ($asc) {
             $list = array_reverse($list, true);
         }
-
+        
         return $list;
     }
-
+    
     /**
      * This method merges multiple arrays into each other. It will traverse elements recursively. While
      * traversing the second array ($b) all its values will be merged into the first array ($a). The values of $b will
@@ -145,10 +145,10 @@ abstract class Basics
     public static function merge(...$args): array
     {
         // Prepare options
-        $mergeNumeric       = true;
+        $mergeNumeric = true;
         $strictNumericMerge = false;
-        $allowRemoval       = false;
-
+        $allowRemoval = false;
+        
         // Extract options and validate input
         $argsClean = [];
         foreach ($args as $k => $arg) {
@@ -158,12 +158,12 @@ abstract class Basics
                     $mergeNumeric = false;
                     continue;
                 }
-
+                
                 if ($argLower === 'allowremoval' || $argLower === 'r') {
                     $allowRemoval = true;
                     continue;
                 }
-
+                
                 if ($argLower === 'strictnumericmerge' || $argLower === 'sn') {
                     $strictNumericMerge = true;
                     continue;
@@ -179,17 +179,17 @@ abstract class Basics
         if (count($args) < 2) {
             throw new ArrayException('At least 2 elements are required to be merged into each other!');
         }
-
-
+        
+        
         // Loop over all given arguments
         $a = array_shift($args);
         while (count($args) > 0) {
             $a = static::mergeWalker($a, array_shift($args), $mergeNumeric, $strictNumericMerge, $allowRemoval);
         }
-
+        
         return $a;
     }
-
+    
     /**
      * Internal helper that is used to do the traverse two arrays recursively and merge them into each other
      *
@@ -208,7 +208,8 @@ abstract class Basics
         bool $mergeNumeric,
         bool $strictNumericMerge,
         bool $allowRemoval
-    ): array {
+    ): array
+    {
         if (! $allowRemoval && empty($a)) {
             return $b;
         }
@@ -229,10 +230,10 @@ abstract class Basics
             }
             $a[$k] = $v;
         }
-
+        
         return $a;
     }
-
+    
     /**
      * This helper can be used to attach one array to the end of another.
      * This is basically [...] + [...] but without overriding numeric keys
@@ -250,7 +251,7 @@ abstract class Basics
         if (in_array(false, array_map('is_array', $args), true)) {
             throw new ArrayException('All elements have to be arrays!');
         }
-
+        
         $a = array_shift($args);
         while (count($args) > 0) {
             foreach (array_shift($args) as $k => $v) {
@@ -261,10 +262,10 @@ abstract class Basics
                 }
             }
         }
-
+        
         return $a;
     }
-
+    
     /**
      * This method can rename keys of a given array according to a given map
      * of ["keyToRename" => "RenamedKey"] as second parameter. Keys not present in $list will be ignored
@@ -282,10 +283,10 @@ abstract class Basics
         foreach ($list as $k => $v) {
             $result[$keysToRename[$k] ?? $k] = $v;
         }
-
+        
         return $result;
     }
-
+    
     /**
      * Adds the given key ($insertKey) and value ($insertValue) pair either BEFORE or AFTER a $pivotKey in a $list.
      *
@@ -307,38 +308,38 @@ abstract class Basics
                 $val = (int)$val;
             }
         }
-
-
+        
+        
         // Clean up
         unset($val, $list[$insertKey]);
-
+        
         // Check if the pivot key exists
         if (! array_key_exists($pivotKey, $list)) {
             $list[$insertKey] = $insertValue;
-
+            
             return $list;
         }
-
+        
         // Position the new key around the the requested position
-        $position        = array_search($pivotKey, array_keys($list), true);
-        $before          = array_slice($list, 0, $position, true);
-        $target          = [$pivotKey => $list[$pivotKey]];
-        $after           = array_slice($list, $position + 1, null, true);
+        $position = array_search($pivotKey, array_keys($list), true);
+        $before = array_slice($list, 0, $position, true);
+        $target = [$pivotKey => $list[$pivotKey]];
+        $after = array_slice($list, $position + 1, null, true);
         $insertKeyIsNull = $insertKey === null;
-        $insert          = $insertKeyIsNull ? [$insertValue] : [$insertKey => $insertValue];
-
+        $insert = $insertKeyIsNull ? [$insertValue] : [$insertKey => $insertValue];
+        
         // Build the output
         if ($insertKeyIsNull) {
             return $insertBefore
                 ? static::attach($before, $insert, $target, $after)
                 : static::attach($before, $target, $insert, $after);
         }
-
+        
         return $insertBefore
             ? $before + $insert + $target + $after
             : $before + $target + $insert + $after;
     }
-
+    
     /**
      * Tiny helper which will shorten a multidimensional array until it's smallest element.
      * This is especially useful for database results.
@@ -361,10 +362,10 @@ abstract class Basics
         while (is_array($array) && count($array) === 1) {
             $array = reset($array);
         }
-
+        
         return $array;
     }
-
+    
     /**
      * Searches the most similar key to the given needle from the haystack
      *
@@ -379,30 +380,30 @@ abstract class Basics
         if (isset($haystack[$needle])) {
             return $needle;
         }
-
+        
         // Generate alternative keys
         $alternativeKeys = array_keys($haystack);
         $alternativeKeys = array_map(static function ($v) {
             return strtolower(trim((string)$v));
         }, array_combine($alternativeKeys, $alternativeKeys));
-
+        
         // Search for a similar key
         $needlePrepared = strtolower(trim($needle));
-        $similarKeys    = [];
+        $similarKeys = [];
         foreach ($alternativeKeys as $alternativeKey => $alternativeKeyPrepared) {
             similar_text($needlePrepared, $alternativeKeyPrepared, $percent);
             $similarKeys[(int)ceil($percent)] = $alternativeKey;
         }
         ksort($similarKeys);
-
+        
         // Check for empty keys
         if (empty($similarKeys)) {
             return null;
         }
-
+        
         return array_pop($similarKeys);
     }
-
+    
     /**
      * Sorts a given multidimensional array by either a key or a path to a key, by keeping
      * the associative relations like asort would
@@ -440,18 +441,18 @@ abstract class Basics
     {
         // Prepare Options
         $separator = isset($options['separator']) && is_string($options['separator']) ? $options['separator'] : '.';
-        $desc      = array_key_exists('desc', $options) && is_bool($options['desc']) ? $options['desc'] : null;
-        $desc      = ($desc === null && in_array('desc', $options, true));
-
+        $desc = array_key_exists('desc', $options) && is_bool($options['desc']) ? $options['desc'] : null;
+        $desc = ($desc === null && in_array('desc', $options, true));
+        
         // Check if it is a simple sort => Use fastlane
         if (strpos($key, $separator) === false) {
             uasort($list, static function ($a, $b) use ($key) {
                 return ($a[$key] ?? null) <=> ($b[$key] ?? null);
             });
-
+            
             return $desc ? array_reverse($list) : $list;
         }
-
+        
         // Use the workaround for paths as key
         // This is exorbitantly faster than using arrayGetPath in the approach above.
         // So this will combine the best of two worlds together
@@ -460,18 +461,18 @@ abstract class Basics
             $sorter[$k] = static::getPath($list, $key, $separator);
         }
         asort($sorter);
-
+        
         // Sort output
         $output = [];
         foreach ($sorter as $k => $foo) {
             $output[$k] = $list[$k];
         }
         unset($sorter);
-
+        
         // Done
         return $desc ? array_reverse($output) : $output;
     }
-
+    
     /**
      * Removes the given list of keys / paths from the $input array and returns the results
      *
@@ -491,10 +492,10 @@ abstract class Basics
         foreach ($pathsToRemove as $path) {
             $list = static::removePath($list, $path, $options);
         }
-
+        
         return $list;
     }
-
+    
     /**
      * Flattens a multidimensional array into a one dimensional array, while keeping
      * their keys as "path". So for example:
@@ -515,19 +516,19 @@ abstract class Basics
     public static function flatten(iterable $list, array $options = []): array
     {
         // Prepare the options
-        $separator  = isset($options['separator']) && is_string($options['separator'])
+        $separator = isset($options['separator']) && is_string($options['separator'])
             ? $options['separator'] : '.';
         $arraysOnly = array_key_exists('arraysOnly', $options) && is_bool($options['arraysOnly'])
             ? $options['arraysOnly'] : null;
         $arraysOnly = ($arraysOnly === null && in_array('arraysOnly', $options, true));
-
+        
         // Run the flattener
         $out = [];
         static::flattenWalker($out, $list, [], $separator, $arraysOnly);
-
+        
         return $out;
     }
-
+    
     /**
      * Internal helper to recursively iterate the given $input array and flatten it's contents into an array
      *
@@ -543,7 +544,8 @@ abstract class Basics
         array $path,
         string $separator,
         bool $arraysOnly
-    ): void {
+    ): void
+    {
         foreach ($input as $k => $v) {
             $path[] = str_replace($separator, '\\' . $separator, (string)$k);
             if ((($arraysOnly && is_array($v)) || (! $arraysOnly && is_iterable($v))) && ! empty($v)) {
@@ -554,7 +556,7 @@ abstract class Basics
             array_pop($path);
         }
     }
-
+    
     /**
      * Basically the reverse operation of flatten()
      * Converts a flattened, one-dimensional array into a multidimensional array, using
@@ -575,15 +577,15 @@ abstract class Basics
         // Prepare the options
         $separator = isset($options['separator']) && is_string($options['separator'])
             ? $options['separator'] : '.';
-
+        
         $out = [];
         foreach ($list as $path => $value) {
             $out = static::setPath($out, $path, $value, $separator);
         }
-
+        
         return $out;
     }
-
+    
     /**
      * Works exactly like array_map but traverses the array recursively.
      *
@@ -599,7 +601,7 @@ abstract class Basics
     {
         return static::mapRecursiveWalker($list, $list, [], $callback);
     }
-
+    
     /**
      * Internal helper to recursively iterate over a given $list and execute a callback for ever child of it.
      *
@@ -615,7 +617,8 @@ abstract class Basics
         array $currentList,
         array $path,
         callable $callback
-    ): array {
+    ): array
+    {
         $output = [];
         foreach ($currentList as $k => $v) {
             $path[] = $k;
@@ -627,7 +630,7 @@ abstract class Basics
             $output[$k] = $v;
             array_pop($path);
         }
-
+        
         return $output;
     }
 }

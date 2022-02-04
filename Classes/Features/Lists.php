@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2021 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.02.11 at 18:40
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -30,7 +30,7 @@ abstract class Lists extends Generator
      * If this value is used in a getList value key, the second part will be used as "alias"
      */
     public const GET_LIST_ALIAS_SEPARATOR = ' as ';
-
+    
     /**
      * This is a multi purpose tool to handle different scenarios when dealing with array lists.
      * It expects a list of similarly structured arrays from which data should be extracted.
@@ -115,29 +115,30 @@ abstract class Lists extends Generator
         $valueKeys,
         $keyKey = null,
         array $options = []
-    ): ?array {
+    ): ?array
+    {
         $valueKeys = $valueKeys ?? [];
-        $default   = $options['default'] ?? null;
+        $default = $options['default'] ?? null;
         $separator = isset($options['separator']) && is_string($options['separator'])
             ? $options['separator'] : static::DEFAULT_PATH_SEPARATOR;
-
+        
         $result = [];
-
+        
         if (empty($input)) {
             return $result;
         }
-
+        
         if (! is_array($valueKeys)) {
             if (! is_string($valueKeys)) {
                 throw new TypeError('The given valueKeys are invalid, only strings and arrays are allowed!');
             }
             $valueKeys = static::makeFromStringList($valueKeys);
         }
-
+        
         if (isset($valueKeys[0]) && $valueKeys[0] === '*') {
             $valueKeys = [];
         }
-
+        
         // Handle Wildcards
         if (empty($valueKeys)) {
             // @todo this is the behaviour that makes sense, however it breaks some tests
@@ -151,40 +152,40 @@ abstract class Lists extends Generator
             if (empty($keyKey)) {
                 return $input;
             }
-
+            
             if ($keyKey === true) {
                 return $input;
             }
-
+            
             foreach ($input as $row) {
                 $result[static::getPath($row, $keyKey, count($result), $separator)] = $row;
             }
-
+            
             return $result;
         }
-
+        
         // Internal helper to generate a definition for a single list key
         $keyDefinitionGenerator = static function (string $key) use ($separator): array {
             $alias = $key;
-
+            
             // Extract an alias value
             if (strpos($key, static::GET_LIST_ALIAS_SEPARATOR) !== false) {
                 $vParts = explode(static::GET_LIST_ALIAS_SEPARATOR, $key);
-                $alias  = array_pop($vParts);
-                $key    = implode(static::GET_LIST_ALIAS_SEPARATOR, $vParts);
+                $alias = array_pop($vParts);
+                $key = implode(static::GET_LIST_ALIAS_SEPARATOR, $vParts);
             }
-
+            
             return [
-                'alias'  => $alias,
-                'key'    => $key,
+                'alias' => $alias,
+                'key' => $key,
                 'isPath' => strpos($key, $separator) !== false && count(static::parsePath($key)) > 1,
             ];
         };
-
+        
         // Build the mapping definition
-        $map               = array_map($keyDefinitionGenerator, $valueKeys);
+        $map = array_map($keyDefinitionGenerator, $valueKeys);
         $isSingleKeyPerRow = count($map) === 1;
-
+        
         // Check if we need to inject the key key manually
         if ($keyKey !== true) {
             if (! empty($keyKey)
@@ -200,24 +201,24 @@ abstract class Lists extends Generator
                 array_unshift($map, $keyDefinitionGenerator($keyKey));
             }
         }
-
+        
         // Remove linked lists
         unset($keyDefinitionGenerator);
-
+        
         // Build the result set from the input row
         foreach ($input as $initialRowKey => $row) {
             // Ignore if row is no array
             if (! is_array($row)) {
                 continue;
             }
-
+            
             // Prepare the row
             $rowResult = [];
-            $rowKey    = null;
-
+            $rowKey = null;
+            
             foreach ($map as $def) {
                 $key = $def['key'];
-
+                
                 if ($def['isPath']) {
                     $value = static::getPath($row, $key, $default, $separator);
                 } elseif (array_key_exists($key, $row)) {
@@ -225,15 +226,15 @@ abstract class Lists extends Generator
                 } else {
                     $value = $default;
                 }
-
+                
                 if ($def['alias'] === $keyKey) {
                     $rowKey = $value;
-
+                    
                     if (isset($keyKeyWasInjected)) {
                         continue;
                     }
                 }
-
+                
                 // Break if we just have a single result in a row
                 // The injected key key always comes first, so it could never be ignored
                 // If an alias was given for the field -> we force the output of an array,
@@ -242,10 +243,10 @@ abstract class Lists extends Generator
                     $rowResult = $value;
                     break;
                 }
-
+                
                 $rowResult[$def['alias']] = $value;
             }
-
+            
             // Either auto-extend the numeric index or inject the row key we resolved
             if ($keyKey === true) {
                 $result[$initialRowKey] = $rowResult;
@@ -254,11 +255,11 @@ abstract class Lists extends Generator
             } else {
                 $result[$rowKey] = $rowResult;
             }
-
+            
             unset($rowResult, $def);
         }
         unset($map);
-
+        
         return $result;
     }
 }

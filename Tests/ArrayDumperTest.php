@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2021 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.01.30 at 16:10
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -29,7 +29,7 @@ use PHPUnit\Framework\TestCase;
 
 class ArrayDumperTest extends TestCase
 {
-
+    
     public function _testToJsonDataProvider(): array
     {
         return [
@@ -38,7 +38,7 @@ class ArrayDumperTest extends TestCase
             [['foo' => 'bar', 'bar' => 'baz'], '{"foo":"bar","bar":"baz"}'],
         ];
     }
-
+    
     /**
      * @param $a
      * @param $b
@@ -50,18 +50,18 @@ class ArrayDumperTest extends TestCase
         static::assertEquals(Arrays::dumpToJson($a), $b);
         static::assertEquals(Arrays::dumpToJson($a, ['pretty' => false]), $b);
     }
-
+    
     public function testToJsonFail(): void
     {
         $this->expectException(JsonException::class);
-
-        $a   = [123];
-        $b   = [&$a];
+        
+        $a = [123];
+        $b = [&$a];
         $a[] = &$b;
-
+        
         Arrays::dumpToJson($a);
     }
-
+    
     public function _testToJsonPrettyProvider(): array
     {
         return [
@@ -83,7 +83,7 @@ class ArrayDumperTest extends TestCase
             ],
         ];
     }
-
+    
     /**
      * @param $a
      * @param $b
@@ -95,26 +95,26 @@ class ArrayDumperTest extends TestCase
         static::assertEquals(Arrays::dumpToJson($a, ['pretty']), $b);
         static::assertEquals(Arrays::dumpToJson($a, ['pretty' => true]), $b);
     }
-
+    
     public function testToJsonPrettyFail(): void
     {
         $this->expectException(JsonException::class);
-
-        $a   = [123];
-        $b   = [&$a];
+        
+        $a = [123];
+        $b = [&$a];
         $a[] = &$b;
-
+        
         Arrays::dumpToJson($a, ['pretty']);
     }
-
+    
     public function testToJsonDepthLimitFail(): void
     {
         $this->expectException(JsonException::class);
-
+        
         $a = [1, [2, [3, [4, [5, [6, [7, [8, [9]]]]]]]]];
         Arrays::dumpToJson($a, ['depth' => 2]);
     }
-
+    
     public function testToJsonOptions(): void
     {
         $a = [1, [2, [3, [4, [5, [6, [7, [8, [9]]]]]]]]];

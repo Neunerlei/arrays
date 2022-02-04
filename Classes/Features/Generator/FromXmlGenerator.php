@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2022 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2022.02.01 at 14:27
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -24,6 +24,7 @@ namespace Neunerlei\Arrays\Features\Generator;
 
 
 use DOMNode;
+use InvalidArgumentException;
 use Neunerlei\Arrays\ArrayGeneratorException;
 use SimpleXMLElement;
 
@@ -34,26 +35,26 @@ class FromXmlGenerator
         if (is_array($input)) {
             return $input;
         }
-
+        
         if (empty($input)) {
             return [];
         }
-
+        
         if (is_string($input)) {
             if (stripos(trim($input), '<?xml') !== 0) {
                 $input = '<?xml version="1.0" encoding="UTF-8"?>' . $input;
             }
-
+            
             $savedState = libxml_use_internal_errors(true);
-            $input      = simplexml_load_string($input);
-            $errors     = libxml_get_errors();
-
+            $input = simplexml_load_string($input);
+            $errors = libxml_get_errors();
+            
             libxml_use_internal_errors($savedState);
             if ($input === false || ! empty($errors)) {
                 throw new ArrayGeneratorException('Failed to parse XML input: ' . reset($errors)->message);
             }
         }
-
+        
         if ($input instanceof DOMNode) {
             $input = simplexml_import_dom($input);
         }
@@ -63,18 +64,18 @@ class FromXmlGenerator
                 array_merge(['' => ''], $input->getNamespaces(true))
             ));
         }
-
+        
         if (! isset($result)) {
             throw new ArrayGeneratorException('The given input is not supported as XML array source!');
         }
-
+        
         if (! $asAssocArray) {
             return $result;
         }
-
+        
         return $this->xmlArrayToAssoc($result);
     }
-
+    
     /**
      * Helper to access the methods from the old base class
      *
@@ -92,10 +93,10 @@ class FromXmlGenerator
             case 'xmlArrayToAssoc':
                 return $this->$method(...$args);
             default:
-                throw new \InvalidArgumentException('The given method: "' . $method . '" is not accessible!');
+                throw new InvalidArgumentException('The given method: "' . $method . '" is not accessible!');
         }
     }
-
+    
     /**
      * This method is basically a slightly adjusted clone of cakephp's xml::_toArray method
      * It recursively converts a given xml tree into an associative php array
@@ -114,7 +115,8 @@ class FromXmlGenerator
         array &$parentData,
         string $ns,
         array $namespaces
-    ): void {
+    ): void
+    {
         $data = [];
         foreach ($namespaces as $namespace) {
             foreach ($xml->attributes($namespace, true) as $key => $value) {
@@ -137,13 +139,13 @@ class FromXmlGenerator
             $ns .= ':';
         } elseif (! empty($namespaces) && count($xml->getNamespaces()) === 1) {
             $nsl = $xml->getNamespaces();
-            $ns  = key($nsl) . ':';
+            $ns = key($nsl) . ':';
         }
-        $name         = $ns . $xml->getName();
-        $data         = ['tag' => $name] + $data;
+        $name = $ns . $xml->getName();
+        $data = ['tag' => $name] + $data;
         $parentData[] = $data;
     }
-
+    
     /**
      * Internal helper that is used to convert an xml result array to a
      * more readable associative array. Be careful with this! There might be sideEffects,
@@ -161,27 +163,27 @@ class FromXmlGenerator
                 continue;
             }
             $key = $el['tag'];
-
+            
             // Check if there is a static content.
             if (isset($el['content'])) {
                 $assoc[$key][] = $el['content'];
                 continue;
             }
-
+            
             // Recursively convert the children to an assoc array
             $assoc[$key] = $this->xmlArrayToAssoc($el);
         }
-
+        
         // Make sure we make the object as easy to read as possible
         // We will strip out all wrapper arrays that we don't need, when we only have a single child.
         $assoc = array_map(static function ($el) {
             if (count($el) === 1 && ! is_array(reset($el)) && is_numeric(key($el))) {
                 return reset($el);
             }
-
+            
             return $el;
         }, $assoc);
-
+        
         // Done
         return $assoc;
     }

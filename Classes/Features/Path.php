@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2021 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.02.11 at 18:32
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -35,7 +35,7 @@ abstract class Path extends Basics
      * This value is used as a separator for path elements in a string path
      */
     public const DEFAULT_PATH_SEPARATOR = '.';
-
+    
     /**
      * The list of additional characters that can be escaped when a path is parsed
      */
@@ -46,29 +46,29 @@ abstract class Path extends Basics
             ']',
             ',',
         ];
-
+    
     /**
      * The different key types
      */
-    protected const KEY_TYPE_DEFAULT  = 0;
+    protected const KEY_TYPE_DEFAULT = 0;
     protected const KEY_TYPE_WILDCARD = 1;
-    protected const KEY_TYPE_KEYS     = 2;
-
+    protected const KEY_TYPE_KEYS = 2;
+    
     /**
      * A list of string path"s and their parsed equivalent for faster lookups
      *
      * @var array
      */
     protected static $pathCache = [];
-
+    
     /**
      * Used as internal tracker to make sure the $pathCache does not create a memory leak
      *
      * @var array
      */
     protected static $pathCacheLimiter = [];
-
-
+    
+    
     /**
      * This method can be used to merge two paths together.
      * This becomes useful if you want to work with a dynamic part in form of an array
@@ -92,15 +92,15 @@ abstract class Path extends Basics
     public static function mergePaths($pathA, $pathB, ?string $separatorA = null, ?string $separatorB = null): array
     {
         $separatorB = $separatorB ?? $separatorA;
-        $pathA      = static::parsePath($pathA, $separatorA, true);
-        $pathB      = static::parsePath($pathB, $separatorB, true);
+        $pathA = static::parsePath($pathA, $separatorA, true);
+        $pathB = static::parsePath($pathB, $separatorB, true);
         foreach ($pathB as $p) {
             $pathA[] = $p;
         }
-
+        
         return $pathA;
     }
-
+    
     /**
      * This method checks if a given path exists in a given $input array
      *
@@ -113,22 +113,22 @@ abstract class Path extends Basics
     public static function hasPath(array $list, $path, ?string $separator = null): bool
     {
         $separator = $separator ?? static::DEFAULT_PATH_SEPARATOR;
-
+        
         if (static::canUseFastLane($path, $separator)) {
             return array_key_exists($path, $list);
         }
-
+        
         $path = static::parsePath($path, $separator);
-
+        
         try {
             static::hasPathWalker($list, $path);
         } catch (Throwable $e) {
             return false;
         }
-
+        
         return true;
     }
-
+    
     /**
      * Internal walker method for "hasPath"
      *
@@ -141,32 +141,32 @@ abstract class Path extends Basics
     protected static function hasPathWalker(array $list, array $path): void
     {
         [$keys, $isLastKey] = static::initWalkerStep($list, $path);
-
+        
         if (empty($list) || empty($keys)) {
             throw new RuntimeException('Given list or keys are empty');
         }
-
+        
         foreach ($keys as $key) {
             // Handle nested paths
             if (is_array($key)) {
                 static::hasPathWalker($list, $key);
                 continue;
             }
-
+            
             if (! array_key_exists($key, $list)) {
                 throw new RuntimeException('Key not found');
             }
-
+            
             if (! $isLastKey) {
                 if (! is_array($list[$key])) {
                     throw new RuntimeException('Child not found');
                 }
-
+                
                 static::hasPathWalker($list[$key], $path);
             }
         }
     }
-
+    
     /**
      * This method reads a single value or multiple values (depending on the given $path) from
      * the given $input array.
@@ -183,16 +183,16 @@ abstract class Path extends Basics
         if (empty($list)) {
             return $default;
         }
-
+        
         $separator = $separator ?? static::DEFAULT_PATH_SEPARATOR;
-
+        
         if (static::canUseFastLane($path, $separator)) {
             return array_key_exists($path, $list) ? $list[$path] : $default;
         }
-
+        
         return static::getPathWalker($list, static::parsePath($path, $separator), $default);
     }
-
+    
     /**
      * Internal walker method for "getPath"
      *
@@ -207,48 +207,48 @@ abstract class Path extends Basics
     protected static function getPathWalker(array $list, array $path, $default, bool $isNested = false)
     {
         [$keys, $isLastKey, $keyType] = static::initWalkerStep($list, $path);
-
+        
         $result = [];
-
+        
         foreach ($keys as $key) {
             if (is_array($key)) {
                 $result = static::merge($result, static::getPathWalker($list, $key, $default, true));
                 continue;
             }
-
+            
             if (! array_key_exists($key, $list)) {
                 $result[$key] = $default;
                 continue;
             }
-
+            
             if ($isLastKey) {
                 $result[$key] = $list[$key];
-
+                
             } else {
                 if (! is_array($list[$key])) {
                     $result[$key] = $default;
                     continue;
                 }
-
+                
                 $result[$key] = static::getPathWalker($list[$key], $path, $default, $isNested);
             }
         }
-
+        
         if ($isNested === true) {
             return $result;
         }
-
+        
         if ($keyType === static::KEY_TYPE_DEFAULT) {
             return $result[key($result)];
         }
-
+        
         if ($keyType === static::KEY_TYPE_WILDCARD && reset($keys) === 0) {
             return array_values($result);
         }
-
+        
         return $result;
     }
-
+    
     /**
      * This method lets you set a given value at a path of your array.
      * You can also set multiple keys to the same value at once if you use wildcards.
@@ -264,15 +264,15 @@ abstract class Path extends Basics
     {
         if (static::canUseFastLane($path, $separator)) {
             $list[$path] = $value;
-
+            
             return $list;
         }
-
+        
         static::setPathWalker($list, static::parsePath($path, $separator), $value);
-
+        
         return $list;
     }
-
+    
     /**
      * Internal walker method for "setPath"
      *
@@ -290,20 +290,20 @@ abstract class Path extends Basics
                 static::setPathWalker($list, $key, $value);
                 continue;
             }
-
+            
             if ($isLastKey) {
                 $list[$key] = $value;
                 continue;
             }
-
+            
             if (! array_key_exists($key, $list) || ! is_array($list[$key])) {
                 $list[$key] = [];
             }
-
+            
             static::setPathWalker($list[$key], $path, $value);
         }
     }
-
+    
     /**
      * Removes the values at the given $path"s from the $input array.
      * It can also remove multiple values at once if you use wildcards.
@@ -326,22 +326,22 @@ abstract class Path extends Basics
     public static function removePath(array $list, $path, array $options = []): array
     {
         $separator = $options['separator'] ?? static::DEFAULT_PATH_SEPARATOR;
-
+        
         if (static::canUseFastLane($path, $separator)) {
             unset($list[$path]);
-
+            
             return $list;
         }
-
+        
         $keepEmpty = array_key_exists('keepEmpty', $options) && is_bool($options['keepEmpty'])
             ? $options['keepEmpty'] : null;
         $keepEmpty = ($keepEmpty === null && in_array('keepEmpty', $options, true));
-
+        
         static::removePathWalker($list, static::parsePath($path, $separator), $keepEmpty);
-
+        
         return $list;
     }
-
+    
     /**
      * Internal walker method for "removePath"
      *
@@ -359,22 +359,22 @@ abstract class Path extends Basics
                 static::removePathWalker($list, $key, $keepEmpty);
                 continue;
             }
-
+            
             if ($isLastKey) {
                 unset($list[$key]);
                 continue;
             }
-
+            
             if (is_array($list[$key])) {
                 static::removePathWalker($list[$key], $path, $keepEmpty);
             }
-
+            
             if (! $keepEmpty && empty($list[$key])) {
                 unset($list[$key]);
             }
         }
     }
-
+    
     /**
      * This method can be used to apply a filter to all values the given $path matches.
      * The given $callback will receive the following parameters:
@@ -392,10 +392,10 @@ abstract class Path extends Basics
     public static function filterPath(array $list, $path, callable $callback, ?string $separator = null): array
     {
         static::filterPathWalker($list, static::parsePath($path, $separator), [], $callback, $list);
-
+        
         return $list;
     }
-
+    
     /**
      * Internal walker method for "filter"
      *
@@ -413,12 +413,13 @@ abstract class Path extends Basics
         array $localPath,
         callable $callback,
         array $inputArray
-    ): void {
+    ): void
+    {
         [$keys, $isLastKey] = static::initWalkerStep($list, $path);
-
+        
         foreach ($keys as $key) {
             $localPath[] = $key;
-
+            
             if (is_array($key)) {
                 static::filterPathWalker($list, $key, $localPath, $callback, $inputArray);
             } elseif ($isLastKey) {
@@ -426,11 +427,11 @@ abstract class Path extends Basics
             } elseif (is_array($list[$key])) {
                 static::filterPathWalker($list[$key], $path, $localPath, $callback, $inputArray);
             }
-
+            
             array_pop($localPath);
         }
     }
-
+    
     /**
      * Internal helper which decides if a path can use the "fast-lane" resolution or not
      *
@@ -444,20 +445,20 @@ abstract class Path extends Basics
         if (! is_string($path) || empty($path)) {
             return false;
         }
-
+        
         if (stripos($path, $separator) !== false) {
             return false;
         }
-
+        
         foreach (static::ESCAPABLE_CHARS as $escapable) {
             if (stripos($path, $escapable) !== false) {
                 return false;
             }
         }
-
+        
         return true;
     }
-
+    
     /**
      * Internal helper which is used to parse the current path into a list of control variables
      *
@@ -469,29 +470,29 @@ abstract class Path extends Basics
     protected static function initWalkerStep(array $input, array &$path): array
     {
         // Prepare result
-        $part      = array_shift($path);
-        $keyType   = static::KEY_TYPE_DEFAULT;
+        $part = array_shift($path);
+        $keyType = static::KEY_TYPE_DEFAULT;
         $isLastKey = empty($path);
-
+        
         // Handle incoming array -> SubKeys
         if (is_array($part)) {
             $keyType = self::KEY_TYPE_KEYS;
-            $keys    = $part;
+            $keys = $part;
         } else {
             $key = $part;
             // Get the type of the current key
             if ($key === '*') {
                 // WILDCARD
                 $keyType = self::KEY_TYPE_WILDCARD;
-                $keys    = array_keys($input);
+                $keys = array_keys($input);
             } else {
                 $keys = [$key];
             }
         }
-
+        
         return [$keys, $isLastKey, $keyType];
     }
-
+    
     /**
      * This method is used to convert a string into a path array.
      * It will also validate already existing path arrays.
@@ -518,19 +519,19 @@ abstract class Path extends Basics
             if ($allowEmpty) {
                 return [];
             }
-
+            
             throw new EmptyPathException('The given path is empty!');
         }
-
+        
         if (! is_string($path) && ! is_numeric($path) && ! is_array($path)) {
             throw new TypeError(
                 'The given path: ' . json_encode($path, JSON_THROW_ON_ERROR)
                 . ' is not valid! Only strings, numbers and arrays are supported!'
             );
         }
-
+        
         $separator = $separator ?? static::DEFAULT_PATH_SEPARATOR;
-
+        
         // Check if the given path array is valid
         if (is_array($path)) {
             $parts = array_values($path);
@@ -541,55 +542,55 @@ abstract class Path extends Basics
                         . ' should only contain numbers, strings and arrays!');
                 }
             });
-
+            
             return $parts;
         }
-
-        $path     = (string)$path;
+        
+        $path = (string)$path;
         $cacheKey = md5($path . $separator);
-
+        
         if (isset(static::$pathCache[$cacheKey])) {
             // Push the cache key to the end of the list -> meaning it is less likely to be
             // dropped when the list grows
             $i = array_search($cacheKey, static::$pathCacheLimiter, true);
             array_splice(static::$pathCacheLimiter, $i, 1);
             static::$pathCacheLimiter[] = $cacheKey;
-
+            
             return static::$pathCache[$cacheKey];
         }
-
+        
         // Check if we can use the fast lane
         if (static::canUseFastLane($path, $separator)) {
             $parts = [$path];
-
+            
         } else {
             // Build escaping list
-            $escapableChars   = static::ESCAPABLE_CHARS;
+            $escapableChars = static::ESCAPABLE_CHARS;
             $escapableChars[] = $separator;
-            $escaping         = [];
+            $escaping = [];
             foreach ($escapableChars as $c => $k) {
-                $escaping['in'][]    = '\\' . $k;
+                $escaping['in'][] = '\\' . $k;
                 $escaping['token'][] = '@ESCAPED@' . $c . '@@';
-                $escaping['out'][]   = $k;
+                $escaping['out'][] = $k;
             }
-
+            
             // Escape the incoming string
             $lengthBeforeEscaping = strlen($path);
-            $path                 = str_replace($escaping['in'], $escaping['token'], $path);
-            $isEscaped            = $lengthBeforeEscaping !== strlen($path);
-
+            $path = str_replace($escaping['in'], $escaping['token'], $path);
+            $isEscaped = $lengthBeforeEscaping !== strlen($path);
+            
             // Resolve braces
             $braces = [$path];
             if (strpos($path, '[') !== false) {
                 $braces = static::resolveBracesInPath($path, $separator);
             }
-
+            
             // Parse the path from a string
             $parts = array_values(array_filter(
                 array_map('trim', explode($separator, $braces[0])), static function ($v) {
                 return $v !== '' && $v !== null;
             }));
-
+            
             // Restore escaped chars
             if ($isEscaped) {
                 foreach ([&$parts, &$braces] as &$list) {
@@ -600,7 +601,7 @@ abstract class Path extends Basics
                 }
                 unset($list);
             }
-
+            
             // Inject braces into the path
             if (count($braces) > 1) {
                 $partsString = json_encode($parts, JSON_THROW_ON_ERROR);
@@ -609,28 +610,28 @@ abstract class Path extends Basics
                 }
                 $parts = json_decode($partsString, true, 512, JSON_THROW_ON_ERROR);
             }
-
+            
         }
-
+        
         if (empty($parts)) {
             if ($allowEmpty) {
                 return [];
             }
-
+            
             throw new EmptyPathException('The path parsing resulted in an empty array!');
         }
-
+        
         static::$pathCache[$cacheKey] = $parts;
-
+        
         // Make sure we don't create a memory leak and only keep the last 20 paths in storage
         static::$pathCacheLimiter[] = $cacheKey;
         if (count(static::$pathCacheLimiter) > 20) {
             unset(static::$pathCache[array_shift(static::$pathCacheLimiter)]);
         }
-
+        
         return $parts;
     }
-
+    
     /**
      * Internal helper which is used to recursively parse the path braces into an array definition.
      *
@@ -643,29 +644,29 @@ abstract class Path extends Basics
     protected static function resolveBracesInPath(string $path, string $separator): array
     {
         $pathString = $path;
-
+        
         // Validate the path
         if (substr_count($path, '[') !== substr_count($path, ']')) {
             throw new InvalidArgumentException(
                 'The given path "' . $path .
                 '" is invalid! There is a mismatch between opening and closing braces!');
         }
-
+        
         // Prepare the working variables
-        $bracesPath   = [];
+        $bracesPath = [];
         $braceCounter = 0;
-        $braceId      = 0;
-        $braces       = [$braceId => ''];
-
+        $braceId = 0;
+        $braces = [$braceId => ''];
+        
         // Read the braces char by char
         $length = strlen($pathString);
         for ($i = 0; $i < $length; $i++) {
             $char = $pathString[$i];
             if ($char === '[') {
                 // Open new brace
-                $bracesPath[]     = $braceId;
+                $bracesPath[] = $braceId;
                 $braces[$braceId] .= '\\(\\b' . (++$braceCounter) . '\\)';
-                $braceId          = $braceCounter;
+                $braceId = $braceCounter;
                 if (! isset($braces[$braceId])) {
                     $braces[$braceId] = '';
                 }
@@ -675,27 +676,27 @@ abstract class Path extends Basics
                 $braceId = (int)array_pop($bracesPath);
             }
         }
-
+        
         // Split the stored braces into parts
         foreach ($braces as $braceId => $brace) {
             if ($braceId === 0) {
                 continue;
             }
-
+            
             // Split at the comma
             $brace = trim($brace, '[],');
             preg_match_all('/(\\.|[^,])+/', $brace, $braceParts);
             $braces[$braceId] = json_encode(array_map(static function ($part) use ($separator) {
                 $part = trim($part);
-
+                
                 if (stripos($part, $separator)) {
                     return static::parsePath($part, $separator);
                 }
-
+                
                 return $part;
             }, $braceParts[0]), JSON_THROW_ON_ERROR);
         }
-
+        
         return $braces;
     }
 }

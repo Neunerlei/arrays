@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2021 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2021.02.12 at 14:37
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -23,7 +23,9 @@ declare(strict_types=1);
 namespace Neunerlei\Arrays;
 
 
-class EmptyPathException extends \InvalidArgumentException
+use InvalidArgumentException;
+
+class EmptyPathException extends InvalidArgumentException
 {
 
 }

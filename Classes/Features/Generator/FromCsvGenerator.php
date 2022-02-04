@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2022 LABOR.digital
+ * Copyright 2022 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2022.02.01 at 14:54
+ * Last modified: 2022.02.04 at 20:24
  */
 
 declare(strict_types=1);
@@ -32,49 +32,50 @@ class FromCsvGenerator
         bool $firstLineKeys = false,
         string $delimiter = ',',
         string $quote = '"'
-    ): array {
+    ): array
+    {
         if (is_array($input)) {
             return $input;
         }
-
+        
         if (empty($input)) {
             return [];
         }
-
+        
         if (! is_string($input)) {
             throw new ArrayGeneratorException('The given input is not supported as CSV array source!');
         }
-
-        $lines     = preg_split('/$\R?^/m', trim($input));
+        
+        $lines = preg_split('/$\R?^/m', trim($input));
         $keyLength = 0;
-
+        
         if ($firstLineKeys) {
-            $keys      = array_shift($lines);
-            $keys      = str_getcsv($keys, $delimiter, $quote);
-            $keys      = array_map('trim', $keys);
+            $keys = array_shift($lines);
+            $keys = str_getcsv($keys, $delimiter, $quote);
+            $keys = array_map('trim', $keys);
             $keyLength = count($keys);
         }
-
+        
         foreach ($lines as $ln => $line) {
             $line = str_getcsv($line, $delimiter, $quote);
             $line = array_map('trim', $line);
-
+            
             // No keys
             if (! isset($keys)) {
                 $lines[$ln] = $line;
                 continue;
             }
-
+            
             // Keys match
             if (count($line) === $keyLength) {
                 $lines[$ln] = array_combine($keys, $line);
                 continue;
             }
-
+            
             // Apply key length to line
             $lines[$ln] = array_combine($keys, array_pad(array_slice($line, 0, $keyLength), $keyLength, null));
         }
-
+        
         return $lines;
     }
 }
