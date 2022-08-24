@@ -238,6 +238,8 @@ class ArrayGeneratorTest extends TestCase
             [[], []],
             [[], ''],
             [[], null],
+            [[0], '0'],
+            [['0'], '0', ['convertTypes' => false]],
             [[0], 0],
             [[123.23], 123.23],
             [[123.23], '123.23'],

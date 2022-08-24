@@ -37,7 +37,7 @@ class FromStringListGenerator
             return $input;
         }
         
-        if (empty($input) && $input !== 0) {
+        if (empty($input) && $input !== 0 && $input !== '0') {
             return [];
         }
         
